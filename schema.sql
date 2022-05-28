@@ -114,3 +114,21 @@ select
   json_array_unpack_i32(velocity) as velocity,
   see_count
 from entity;
+
+insert into entity select
+    (rand() * 100000) :> bigint as cid,
+    null as eid,
+    json_array_pack_i32(
+        json_array_push_double(
+            json_array_push_double('[]', (rand(eid+now()) * 100) :> int),
+            (rand(eid+1+now()) * 100) :> int
+        )
+    ) as position,
+    json_array_pack_i32(
+        json_array_push_double(
+            json_array_push_double('[]', if(rand(eid+1+now()) > 0.5, 1, -1)),
+            if(rand(eid+now()) > 0.5, 1, -1)
+        )
+    ) as velocity,
+    0 as see_count
+    from entity;
