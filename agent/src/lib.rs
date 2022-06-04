@@ -67,8 +67,12 @@ impl agent::Agent for Agent {
         let cmd = target
             .map(|t| {
                 let (dir, mut dist) = Point::direction_and_distance(&position, &t);
-                dist = dist.min(e.thrusters);
-                Command::Move(dir, dist)
+                if dist > 0 {
+                    dist = dist.min(e.thrusters);
+                    Command::Move(dir, dist)
+                } else {
+                    Command::Hold
+                }
             })
             .unwrap_or(Command::Hold);
 
