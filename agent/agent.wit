@@ -1,0 +1,16 @@
+record entity {
+    kind: u8,
+    
+    x: u32,
+    y: u32,
+
+    energy: u16,
+    shield: u8,
+    blasters: u8,
+    thrusters: u8,
+    harvesters: u8,
+}
+
+pack: function(e: entity) -> list<u8>
+step: function(e: entity, cell: list<u8>) -> u8
+decodecmd: function(m: u8) -> string
