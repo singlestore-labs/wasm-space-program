@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 NUM_SHARDS=32
-DATABASE=v2
+DATABASE=game
 
 update_shard() {
     local num_shards="${1}"

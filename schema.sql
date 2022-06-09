@@ -1,6 +1,6 @@
 drop all from plancache;
-create database if not exists v2;
-use v2;
+create database if not exists game;
+use game;
 
 create rowstore table if not exists entity (
   cid BIGINT NOT NULL,
