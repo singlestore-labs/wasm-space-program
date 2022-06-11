@@ -25,16 +25,16 @@ create rowstore table if not exists entity (
 SET GLOBAL wasm_max_linear_memory_size = default;
 
 create or replace function pack as wasm
-  from infile "agent/target/wasm32-wasi/debug/agent.wasm"
-  with wit from infile "agent/agent.wit";
+  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  with wit from local infile "agent/interface.wit";
 
 create or replace function step as wasm
-  from infile "agent/target/wasm32-wasi/debug/agent.wasm"
-  with wit from infile "agent/agent.wit";
+  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  with wit from local infile "agent/interface.wit";
 
 create or replace function decodecmd as wasm
-  from infile "agent/target/wasm32-wasi/debug/agent.wasm"
-  with wit from infile "agent/agent.wit";
+  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  with wit from local infile "agent/interface.wit";
 
 insert into entity
     (cid, eid,  kind,   x,  y)
@@ -60,13 +60,9 @@ create view entity_next as (
       ),
       group_concat(pack(row(
         neighbor.kind,
-        neighbor.x,
-        neighbor.y,
-        neighbor.energy,
-        neighbor.shield,
         neighbor.blasters,
-        neighbor.thrusters,
-        neighbor.harvesters
+        neighbor.x,
+        neighbor.y
       )) separator '')
     ) as cmd
   from entity
@@ -78,6 +74,13 @@ create view entity_next as (
   group by entity.cid, entity.eid
 );
 
+create view debug_next as (
+  select
+    entity.cid, entity.eid, entity.x, entity.y, 
+    decodecmd(cmd)
+  from entity natural join entity_next
+);
+
 /*
 create table cids (cid bigint AUTO_INCREMENT primary key);
 insert into cids values (null);
@@ -85,11 +88,11 @@ insert into cids select null from cids;
 
 -- create ships
 insert into entity (cid, eid, kind, x, y)
-select cid, null, 1, rand(now() + cid) * 1000, rand(now() + cid) * 1000
+select cid, null, 1, rand(now() + cid) * 1000, rand(now() + cid + 1) * 1000
 from cids;
 
 -- create energy nodes
 insert into entity (cid, eid, kind, x, y)
-select cid, null, 2, rand(now() + cid) * 1000, rand(now() + cid) * 1000
+select cid, null, 2, rand(now() + cid) * 1000, rand(now() + cid + 1) * 1000
 from cids;
 */
