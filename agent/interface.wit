@@ -1,3 +1,10 @@
+record entity-summary {
+    kind: u8,
+    danger: u8,
+    x: u32,
+    y: u32,
+}
+
 record entity {
     kind: u8,
     
@@ -11,6 +18,6 @@ record entity {
     harvesters: u8,
 }
 
-pack: function(e: entity) -> list<u8>
+pack: function(e: entity-summary) -> list<u8>
 step: function(e: entity, cell: list<u8>) -> u8
 decodecmd: function(m: u8) -> string
