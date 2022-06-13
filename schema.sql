@@ -96,3 +96,8 @@ insert into entity (cid, eid, kind, x, y)
 select cid, null, 2, rand(now() + cid) * 1000, rand(now() + cid + 1) * 1000
 from cids;
 */
+
+-- WEB API
+
+create user web identified by 'wasm-space-program';
+grant select on game.* to web;
