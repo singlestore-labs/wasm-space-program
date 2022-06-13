@@ -11,9 +11,9 @@ import (
 )
 
 type Config struct {
-	API               APIConfig      `toml:"api" envPrefix:"API"`
-	DatabasePrimary   DatabaseConfig `toml:"database_primary" envPrefix:"DATABASE_PRIMARY"`
-	DatabaseSecondary DatabaseConfig `toml:"database_secondary" envPrefix:"DATABASE_SECONDARY"`
+	API        APIConfig        `toml:"api" envPrefix:"API"`
+	Database   DatabaseConfig   `toml:"database" envPrefix:"DATABASE"`
+	WebDataAPI WebDataAPIConfig `toml:"web" envPrefix:"WEB"`
 }
 
 type APIConfig struct {
@@ -21,11 +21,18 @@ type APIConfig struct {
 }
 
 type DatabaseConfig struct {
-	Hosts    []string `env:"HOSTS"`
-	Port     int      `env:"PORT"`
-	Username string   `env:"USERNAME"`
-	Password string   `env:"PASSWORD"`
-	Database string   `env:"NAME" toml:"name"`
+	Host     string `env:"HOST"`
+	Port     int    `env:"PORT"`
+	Username string `env:"USERNAME"`
+	Password string `env:"PASSWORD"`
+	Database string `env:"DB" toml:"db"`
+}
+
+type WebDataAPIConfig struct {
+	Endpoints []string `env:"HOSTS"`
+	Username  string   `env:"USERNAME"`
+	Password  string   `env:"PASSWORD"`
+	Database  string   `env:"DB" toml:"db"`
 }
 
 func (c *Config) String() string {
@@ -46,11 +53,27 @@ func (c *APIConfig) Validate() error {
 }
 
 func (c *DatabaseConfig) Validate() error {
-	if len(c.Hosts) == 0 {
-		return fmt.Errorf("no hosts specified")
+	if len(c.Host) == 0 {
+		return fmt.Errorf("no host specified")
 	}
 	if c.Port == 0 {
 		return fmt.Errorf("no port specified")
+	}
+	if c.Username == "" {
+		return fmt.Errorf("no username specified")
+	}
+	if c.Password == "" {
+		return fmt.Errorf("no password specified")
+	}
+	if c.Database == "" {
+		return fmt.Errorf("no database name specified")
+	}
+	return nil
+}
+
+func (c *WebDataAPIConfig) Validate() error {
+	if len(c.Endpoints) == 0 {
+		return fmt.Errorf("no endpoints specified")
 	}
 	if c.Username == "" {
 		return fmt.Errorf("no username specified")
@@ -95,11 +118,11 @@ func LoadConfig(filename string) (*Config, error) {
 	if err := out.API.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid api config: %w", err)
 	}
-	if err := out.DatabasePrimary.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid primary database config: %w", err)
+	if err := out.Database.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid database config: %w", err)
 	}
-	if err := out.DatabaseSecondary.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid secondary database config: %w", err)
+	if err := out.WebDataAPI.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid web data api config: %w", err)
 	}
 
 	log.Printf("config is valid.")

@@ -3,34 +3,46 @@ package api
 import (
 	"backend/config"
 	"fmt"
-	"math/rand"
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	cfg   config.APIConfig
-	dbcfg config.DatabaseConfig
+	cfg     config.APIConfig
+	dataapi config.WebDataAPIConfig
 }
 
-func NewServer(cfg config.APIConfig, dbcfg config.DatabaseConfig) *Server {
+func NewServer(cfg config.APIConfig, dataapi config.WebDataAPIConfig) *Server {
 	return &Server{
-		cfg:   cfg,
-		dbcfg: dbcfg,
+		cfg:     cfg,
+		dataapi: dataapi,
 	}
 }
 
 func (s *Server) ListenAndServe() error {
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"*"},
+		MaxAge:           12 * time.Hour,
+		AllowCredentials: true,
+	}))
+
 	r.GET("/connect", func(c *gin.Context) {
+		// MUST match ConnectConfig in web/src/data/backend.ts
 		c.JSON(http.StatusOK, gin.H{
-			"host": s.dbcfg.Hosts[rand.Intn(len(s.dbcfg.Hosts))],
-			"port": s.dbcfg.Port,
-			"user": s.dbcfg.Username,
-			"pass": s.dbcfg.Password,
-			"db":   s.dbcfg.Database,
+			"endpoints": s.dataapi.Endpoints,
+			"username":  s.dataapi.Username,
+			"password":  s.dataapi.Password,
+			"database":  s.dataapi.Database,
 		})
 	})
+
 	return r.Run(fmt.Sprintf(":%d", s.cfg.Port))
 }

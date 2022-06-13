@@ -1,16 +1,15 @@
 [api]
 port = 3001
 
-[database_primary]
-hosts = ["127.0.0.1"]
+[database]
+host = "127.0.0.1"
 port = 3306
 username = "root"
 password = "test"
-name = "game"
+db = "game"
 
-[database_secondary]
-hosts = ["127.0.0.1"]
-port = 3306
+[web]
+endpoints = ["127.0.0.1:8080"]
 username = "web"
 password = "wasm-space-program"
-name = "game"
+db = "game"

@@ -16,7 +16,7 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	svc := api.NewServer(cfg.API, cfg.DatabaseSecondary)
+	svc := api.NewServer(cfg.API, cfg.WebDataAPI)
 	if err := svc.ListenAndServe(); err != nil {
 		log.Fatalf("api server crashed: %v", err)
 	}
