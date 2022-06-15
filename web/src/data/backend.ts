@@ -7,7 +7,7 @@ export type ConnectConfig = {
 
 export const FetchConnectConfig = async (): Promise<ConnectConfig> => {
   const connectURL = import.meta.env.VITE_BACKEND_URL + "/connect";
-  let response = await fetch(connectURL);
+  const response = await fetch(connectURL);
   if (!response.ok) {
     throw new Error(`Failed to load connection config from ${connectURL}`);
   }

@@ -1,7 +1,7 @@
 import { FetchConnectConfig } from "@/data/backend";
 import { ClientConfig } from "@/data/client";
 import { atom } from "jotai";
-import { atomWithHash } from "jotai/utils";
+import { atomFamily, atomWithHash } from "jotai/utils";
 
 const connectConfigAtom = atom(FetchConnectConfig);
 
@@ -24,33 +24,38 @@ export const clientConfigAtom = atom<ClientConfig>((get) => {
   };
 });
 
-type Viewport = {
-  x: number;
-  y: number;
-  zoom: number;
+// n: number to round
+// d: number of decimal places
+const round = (n: number, d: number) => {
+  const places = Math.pow(10, d);
+  return Math.round(n * places) / places;
 };
 
-const viewportXAtom = atomWithHash("x", 0);
-const viewportYAtom = atomWithHash("y", 0);
-const viewportZoomAtom = atomWithHash("zoom", 0);
-
-export const viewportAtom = atom(
-  (get) =>
-    ({
-      x: get(viewportXAtom),
-      y: get(viewportYAtom),
-      zoom: get(viewportZoomAtom),
-    } as Viewport),
-  (get, set, v: Viewport) => {
-    set(viewportXAtom, v.x);
-    set(viewportYAtom, v.y);
-    set(viewportZoomAtom, v.zoom);
+export const viewportAtom = atomWithHash(
+  "v",
+  { x: 0, y: 0, scale: 1 },
+  {
+    serialize: ({ x, y, scale }) =>
+      `${round(x, 2)}_${round(y, 2)}_${round(scale, 2)}`,
+    deserialize: (s) => {
+      const [x, y, scale] = s.split("_").map(parseFloat);
+      if (
+        x === undefined ||
+        y === undefined ||
+        scale === undefined ||
+        isNaN(x) ||
+        isNaN(y) ||
+        isNaN(scale)
+      ) {
+        return { x: 0, y: 0, scale: 1 };
+      }
+      return { x, y, scale };
+    },
+    replaceState: true,
   }
 );
 
 // use setFollowEntity(RESET) to clear
 export const followEntityAtom = atomWithHash<number | null>("follow", null);
 
-if (import.meta.hot) {
-  import.meta.hot.decline();
-}
+export const tickDurationMsAtom = atomFamily(() => atom(0));

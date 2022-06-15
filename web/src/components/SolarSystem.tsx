@@ -1,31 +1,58 @@
-import { followEntityAtom, viewportAtom } from "@/data/atoms";
-import { useAtom } from "jotai";
-import { RESET } from "jotai/utils";
-import { useEffect } from "react";
+import { Viewport } from "@/components/Viewport";
+import { colors, colorToNumber } from "@/theme";
+import { useConst } from "@chakra-ui/react";
+import { Graphics, Sprite } from "@inlet/react-pixi";
+import spaceshipUrl from "assets/spaceship.svg";
+import * as PIXI from "pixi.js";
+import { useCallback } from "react";
 
-const GRID_SIZE = 50; // px, square
-const SIZE = 1000; // grid cells, square
+const GRID_SIZE = 40; // px, square
+const SIZE = 100; // grid cells, square
 
-export const SolarSystem = () => {
-  const [viewport, setViewport] = useAtom(viewportAtom);
-  const [followEntity, setFollowEntity] = useAtom(followEntityAtom);
+type Props = {
+  width: number;
+  height: number;
+};
 
-  useEffect(() => {
-    let i = 0;
-    const intervalID = setInterval(() => {
-      setFollowEntity(i++);
-      if (i > 10) {
-        setFollowEntity(RESET);
-      }
-      setViewport({
-        x: viewport.x + i++,
-        y: viewport.y + i++,
-        zoom: viewport.zoom + i++,
-      });
-    }, 1000);
-    return () => clearInterval(intervalID);
-  }, []);
+const randomCell = () => {
+  const x = Math.floor(Math.random() * SIZE) * GRID_SIZE;
+  const y = Math.floor(Math.random() * SIZE) * GRID_SIZE;
+  return { x, y };
+};
 
-  console.log(viewport, followEntity);
-  return <h1>Solar System</h1>;
+export const SolarSystem = (props: Props) => {
+  const { width, height } = props;
+
+  const worldWidth = SIZE * GRID_SIZE;
+  const worldHeight = SIZE * GRID_SIZE;
+
+  const ships = useConst(() =>
+    Array.from({ length: 1000 }, () => randomCell()).map(({ x, y }, idx) => (
+      <Sprite key={idx} x={x} y={y} height={GRID_SIZE} image={spaceshipUrl} />
+    ))
+  );
+
+  return (
+    <Viewport
+      screenHeight={height}
+      screenWidth={width}
+      worldHeight={worldHeight}
+      worldWidth={worldWidth}
+    >
+      <Graphics
+        draw={useCallback((g: PIXI.Graphics) => {
+          g.clear();
+          g.lineStyle(1, colorToNumber(colors.white), 1);
+          for (let x = 0; x < worldWidth; x += GRID_SIZE) {
+            for (let y = 0; y < worldHeight; y += GRID_SIZE) {
+              g.moveTo(x, y + GRID_SIZE);
+              g.lineTo(x, y);
+              g.lineTo(x + GRID_SIZE, y);
+            }
+          }
+        }, [])}
+      />
+      {ships}
+    </Viewport>
+  );
 };

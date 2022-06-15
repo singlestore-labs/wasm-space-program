@@ -20,7 +20,7 @@ func NewDatabase(config config.DatabaseConfig) (*Database, error) {
 	mysqlConf.User = config.Username
 	mysqlConf.Passwd = config.Password
 	mysqlConf.DBName = config.Database
-	mysqlConf.Addr = fmt.Sprintf("%s:%d", config.Hosts[0], config.Port)
+	mysqlConf.Addr = fmt.Sprintf("%s:%d", config.Host, config.Port)
 	mysqlConf.ParseTime = true
 	mysqlConf.Timeout = 10 * time.Second
 	mysqlConf.InterpolateParams = true
