@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sprites": "rm assets/sprites/spritesheet*; spritesheet-js -f pixi.js -n spritesheet -p assets/sprites --trim --validate assets/sprites/*.png"
   },
   "dependencies": {
     "@babel/core": "^7.18.5",
-    "@chakra-ui/system": "^1",
     "@chakra-ui/icons": "^1",
     "@chakra-ui/react": "^1",
+    "@chakra-ui/system": "^1",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11",
     "@fontsource/inter": "^4.5.11",
@@ -22,13 +23,13 @@
     "jotai": "^1.7.2",
     "pixi-viewport": "^4.34.4",
     "pixi.js": "^6.4.2",
+    "prop-types": "^15",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-router-dom": "6",
     "rooks": "^5.11.2",
     "swr": "^1.3.0",
-    "ts-dedent": "^2.2.0",
-    "prop-types": "^15"
+    "ts-dedent": "^2.2.0"
   },
   "devDependencies": {
     "@emotion/babel-plugin": "^11.9.2",
@@ -40,6 +41,7 @@
     "eslint": "^8.7.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "spritesheet-js": "krzysztof-o/spritesheet.js",
     "typescript": "^4.6.3",
     "vite": "^2.9.9",
     "vite-tsconfig-paths": "^3.5.0"

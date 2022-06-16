@@ -1,15 +1,13 @@
 import { DebugGrid } from "@/components/DebugGrid";
 import { DebugOnly } from "@/components/DebugOnly";
+import { Entity } from "@/components/Entity";
+import { SpriteGrid } from "@/components/SpriteGrid";
 import { Viewport } from "@/components/Viewport";
-import { clientConfigAtom } from "@/data/atoms";
-import {
-  Bounds,
-  SOLAR_SYSTEM_SIZE_PX,
-  worldToCellBounds,
-} from "@/data/coordinates";
-import { queryEntitiesInBounds } from "@/data/queries";
+import { clientConfigAtom, followEntityAtom } from "@/data/atoms";
+import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
+import { queryEntities } from "@/data/queries";
+import { Container } from "@inlet/react-pixi";
 import { useAtomValue } from "jotai";
-import { useCallback, useState } from "react";
 import useSWR from "swr";
 
 type Props = {
@@ -20,22 +18,39 @@ type Props = {
 
 export const SolarSystem = (props: Props) => {
   const { width, height, cid } = props;
-  const [bounds, setBounds] = useState<Bounds | null>(null);
+  // const [bounds, setBounds] = useState<Bounds | null>(null);
 
-  const onBoundsChanged = useCallback(
-    (bounds: Bounds) => setBounds(worldToCellBounds(bounds)),
-    []
-  );
+  // const onBoundsChanged = useCallback(
+  //   (bounds: Bounds) => setBounds(worldToCellBounds(bounds)),
+  //   []
+  // );
+
+  const followEntity = useAtomValue(followEntityAtom);
 
   const clientConfig = useAtomValue(clientConfigAtom);
-  const { data } = useSWR(["entitiesInBounds", cid, bounds], () => {
-    if (bounds) {
-      return queryEntitiesInBounds(clientConfig, cid, bounds);
+  const { data } = useSWR(
+    ["entitiesInBounds", cid],
+    () => {
+      return queryEntities(clientConfig, cid);
+    },
+    {
+      refreshInterval: 1000,
+      dedupingInterval: 10,
     }
-  });
+  );
 
-  // TODO: display entities!
-  // console.log(data);
+  const entities = [];
+  if (data) {
+    for (const entity of data) {
+      entities.push(
+        <Entity
+          key={entity.eid}
+          entity={entity}
+          follow={entity.eid === followEntity}
+        />
+      );
+    }
+  }
 
   return (
     <Viewport
@@ -43,11 +58,15 @@ export const SolarSystem = (props: Props) => {
       screenWidth={width}
       worldHeight={SOLAR_SYSTEM_SIZE_PX}
       worldWidth={SOLAR_SYSTEM_SIZE_PX}
-      onBoundsChanged={onBoundsChanged}
+      // onBoundsChanged={onBoundsChanged}
     >
       <DebugOnly>
-        <DebugGrid highlightCells={bounds} />
+        <DebugGrid />
+        <Container y={-140}>
+          <SpriteGrid />
+        </Container>
       </DebugOnly>
+      <Container sortableChildren>{entities}</Container>
     </Viewport>
   );
 };

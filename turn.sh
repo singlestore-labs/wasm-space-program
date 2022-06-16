@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NUM_SHARDS=32
+NUM_SHARDS=8
 DATABASE=game
 
 update_shard() {

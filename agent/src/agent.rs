@@ -1,9 +1,30 @@
 use crate::cell::Cell;
-use crate::command::Command;
+use crate::command::{Command, Component};
 use crate::interface::Entity;
 use crate::point::Point;
 
 pub fn step(e: Entity, cell: Cell) -> Command {
+    // consider gear upgrades
+    // TODO: only upgrade gear if we can get to a energy node with remaining energy
+    if e.harvesters < 2 && e.energy > 50 {
+        return Command::Upgrade(Component::Harvesters);
+    }
+    if e.thrusters < 2 && e.energy > 100 {
+        return Command::Upgrade(Component::Thrusters);
+    }
+    if e.blasters < 2 && e.energy > 100 {
+        return Command::Upgrade(Component::Blasters);
+    }
+    if e.harvesters < 5 && e.energy > 100 {
+        return Command::Upgrade(Component::Harvesters);
+    }
+    if e.thrusters < 5 && e.energy > 100 {
+        return Command::Upgrade(Component::Thrusters);
+    }
+    if e.blasters < 5 && e.energy > 100 {
+        return Command::Upgrade(Component::Blasters);
+    }
+
     let position = e.position();
 
     let mut target_distance: f32 = f32::MAX;

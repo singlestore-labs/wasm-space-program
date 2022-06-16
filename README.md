@@ -72,13 +72,3 @@ The 5 low bits encode the argument
 1. every entity chooses a single action to take
    * entity's can only see the position and kind of every other object in the current cell
 2. 
-
-# TODO
-
-need to figure out how to represent the current cell in a compressed fashion
-
-need to know
-* position
-* type
-* size? -> could be an abstract representation of how much energy something has, or how many blasters it has for example
-* team? -> if we end up with teams, this is important for coordination

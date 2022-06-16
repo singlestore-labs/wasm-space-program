@@ -1,3 +1,4 @@
+import { AssetLoader } from "@/components/AssetLoader";
 import { ErrorBoundary, ErrorOverlay } from "@/components/ErrorOverlay";
 import { PixiLoader } from "@/components/PixiLoader";
 import { Router } from "@/components/Router";
@@ -52,7 +53,9 @@ render(
         <PixiRoot>
           <ErrorBoundary>
             <Suspense fallback={<PixiLoader />}>
-              <Router />
+              <AssetLoader>
+                <Router />
+              </AssetLoader>
             </Suspense>
           </ErrorBoundary>
         </PixiRoot>

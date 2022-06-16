@@ -5,7 +5,9 @@ ARG VARIANT="buster"
 FROM mcr.microsoft.com/vscode/devcontainers/rust:0-${VARIANT}
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends mariadb-client
+    && apt-get -y install --no-install-recommends \
+        mariadb-client \
+        imagemagick
 
 ENV WASMTIME_VERSION=0.37.0
 RUN curl -L https://github.com/bytecodealliance/wasmtime/releases/download/v${WASMTIME_VERSION}/wasmtime-v${WASMTIME_VERSION}-x86_64-linux.tar.xz \ 
