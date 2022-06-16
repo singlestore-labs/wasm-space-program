@@ -10,6 +10,8 @@ type ViewportProps = {
   worldWidth: number;
   worldHeight: number;
 
+  onBoundsChanged?: (bounds: PIXI.Rectangle) => void;
+
   children?: React.ReactNode;
 };
 
@@ -44,12 +46,16 @@ const PixiComponentViewport = PixiComponent("Viewport", {
     viewport.setZoom(props.initialScale);
     viewport.moveCorner(props.initialX, props.initialY);
 
+    // trigger onBoundsChanged callback on initial values
+    props.onBoundsChanged?.(viewport.getVisibleBounds());
+
     viewport.on("moved-end", (viewport: PixiViewport) => {
       const {
         corner: { x, y },
         scale: { _x: scale },
       } = viewport;
       props.setViewport({ x, y, scale });
+      props.onBoundsChanged?.(viewport.getVisibleBounds());
     });
 
     return viewport;

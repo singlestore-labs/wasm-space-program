@@ -22,8 +22,6 @@ create rowstore table if not exists entity (
   SHARD KEY (cid)
 );
 
-SET GLOBAL wasm_max_linear_memory_size = default;
-
 create or replace function pack as wasm
   from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
   with wit from local infile "agent/interface.wit";

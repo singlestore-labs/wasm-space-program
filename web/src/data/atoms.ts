@@ -3,6 +3,12 @@ import { ClientConfig } from "@/data/client";
 import { atom } from "jotai";
 import { atomFamily, atomWithHash } from "jotai/utils";
 
+export const debugAtom = atomWithHash("debug", false, {
+  replaceState: true,
+});
+
+export const unhandledErrorAtom = atom<null | Error>(null);
+
 const connectConfigAtom = atom(FetchConnectConfig);
 
 export const connectEndpointsAtom = atom(
@@ -24,36 +30,34 @@ export const clientConfigAtom = atom<ClientConfig>((get) => {
   };
 });
 
-// n: number to round
-// d: number of decimal places
-const round = (n: number, d: number) => {
-  const places = Math.pow(10, d);
-  return Math.round(n * places) / places;
-};
-
 export const viewportAtom = atomWithHash(
   "v",
   { x: 0, y: 0, scale: 1 },
   {
     serialize: ({ x, y, scale }) =>
-      `${round(x, 2)}_${round(y, 2)}_${round(scale, 2)}`,
+      `${Math.round(x)}_${Math.round(y)}_${Math.round(scale * 100)}`,
     deserialize: (s) => {
-      const [x, y, scale] = s.split("_").map(parseFloat);
+      const [x, y, rawScale] = s.split("_").map((i) => parseInt(i, 10));
       if (
         x === undefined ||
         y === undefined ||
-        scale === undefined ||
+        rawScale === undefined ||
         isNaN(x) ||
         isNaN(y) ||
-        isNaN(scale)
+        isNaN(rawScale)
       ) {
         return { x: 0, y: 0, scale: 1 };
       }
+      const scale = rawScale / 100;
       return { x, y, scale };
     },
     replaceState: true,
   }
 );
+
+export const cidAtom = atomWithHash<null | number>("cid", null, {
+  replaceState: true,
+});
 
 // use setFollowEntity(RESET) to clear
 export const followEntityAtom = atomWithHash<number | null>("follow", null);
