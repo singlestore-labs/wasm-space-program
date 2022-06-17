@@ -24,8 +24,12 @@
    yarn
    yarn dev
    ```
-7. open your browser to http://localhost:3000#cid=0
-8. create some entities with cid=0 (cid is the name of the solar system)
+7. run the game
+   ```bash
+   ./run_turns.sh
+   ```
+8. open your browser to http://localhost:3000#cid=0
+9. create some entities with cid=0 (cid is the name of the solar system) (see schema.sql for examples)
 
 Notice that the url contains useful things like the cid to look at. This will get fancier once I build the universe map, but till then you can look at solar systems by changing `cid=X` in the url.
 
