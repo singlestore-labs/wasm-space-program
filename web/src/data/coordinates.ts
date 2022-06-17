@@ -3,6 +3,8 @@ export const CELL_SIZE_PX = 40;
 
 export const SOLAR_SYSTEM_SIZE_PX = SOLAR_SYSTEM_SIZE_CELLS * CELL_SIZE_PX;
 
+export type Vector = [number, number];
+
 export interface Bounds {
   x: number;
   y: number;
@@ -44,3 +46,28 @@ export const boundsContains = (bounds: Bounds, x: number, y: number): boolean =>
   x < bounds.x + bounds.width &&
   y >= bounds.y &&
   y < bounds.y + bounds.height;
+
+export const vectorAdd = (a: Vector, b: Vector): Vector => [
+  a[0] + b[0],
+  a[1] + b[1],
+];
+
+export const vectorSubtract = (a: Vector, b: Vector): Vector => [
+  a[0] - b[0],
+  a[1] - b[1],
+];
+
+export const vectorMagnitude = (a: Vector): number =>
+  Math.sqrt(a[0] ** 2 + a[1] ** 2);
+
+export const vectorMultiply = (a: Vector, b: number): Vector => [
+  a[0] * b,
+  a[1] * b,
+];
+export const vectorDivide = (a: Vector, b: number): Vector => [
+  a[0] / b,
+  a[1] / b,
+];
+
+export const vectorEqual = (a: Vector, b: Vector): boolean =>
+  a[0] === b[0] && a[1] === b[1];

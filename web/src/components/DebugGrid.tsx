@@ -14,12 +14,17 @@ type Props = {
   highlightCells?: Bounds | null;
 };
 
+const gridColor = colorToNumber(colors.purple[500]);
+const gridAlpha = 0.25;
+const gridLineWidth = 2;
+const highlightTint = colorToNumber(colors.red[900]);
+
 export const DebugGrid = ({ highlightCells }: Props) => (
   <Graphics
     draw={useCallback(
       (g: PIXI.Graphics) => {
         g.clear();
-        g.lineStyle(4, colorToNumber(colors.white), 0.25);
+        g.lineStyle(gridLineWidth, gridColor, gridAlpha);
         for (let x = 0; x < SOLAR_SYSTEM_SIZE_PX; x += CELL_SIZE_PX) {
           for (let y = 0; y < SOLAR_SYSTEM_SIZE_PX; y += CELL_SIZE_PX) {
             const [xCell, yCell] = worldToCell(x, y);
@@ -27,7 +32,7 @@ export const DebugGrid = ({ highlightCells }: Props) => (
               highlightCells &&
               boundsContains(highlightCells, xCell, yCell)
             ) {
-              g.beginFill(colorToNumber(colors.red[900]), 1);
+              g.beginFill(highlightTint, 0.2);
               g.drawRect(x, y, CELL_SIZE_PX, CELL_SIZE_PX);
               g.endFill();
             }

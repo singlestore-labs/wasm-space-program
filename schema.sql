@@ -93,6 +93,15 @@ create view entity_damage as (
   group by a.cid, a.eid
 );
 
+drop view if exists cells_with_multiple_entities;
+create view cells_with_multiple_entities as (
+  select x, y from (
+    select x, y, count(*) as c from entity
+    group by x, y
+  )
+  where c > 1
+);
+
 drop view if exists entities_without_conflict;
 create view entities_without_conflict as (
   select a.*
@@ -227,7 +236,7 @@ insert into entity set
     x = 10,
     y = 20,
     energy = 100,
-    shield = -10,
+    shield = 100,
     blasters = 1,
     thrusters = 1,
     harvesters = 1;
@@ -251,6 +260,19 @@ select cid, null, 2, floor(rand(now() + cid) * 100), floor(rand(now() + cid + 1)
 from cids;
 
 insert into entity (cid, eid, kind, x, y)
-select cid, null, 2, floor(rand(now() + eid) * 100), floor(rand(now() + eid + 1) * 100)
+select cid, null, 2, floor(rand(now() + eid) * 100) as x, floor(rand(now() + eid + 1) * 100) as y
 from entity;
+
+-- remove cells containing multiple entities
+delete entity from entity
+join cells_with_multiple_entities mult
+on (entity.x = mult.x and entity.y = mult.y);
+
+-- backup and restore
+create table entity_backup as select * from entity;
+insert into entity select * from entity_backup;
+
+update entity
+  set blasters = 10, harvesters = 50, thrusters = 10
+where kind = 1;
 */

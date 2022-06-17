@@ -7,6 +7,10 @@ export const debugAtom = atomWithHash("debug", false, {
   replaceState: true,
 });
 
+export const debugPlaygroundAtom = atomWithHash("play", false, {
+  replaceState: true,
+});
+
 export const unhandledErrorAtom = atom<null | Error>(null);
 
 const connectConfigAtom = atom(FetchConnectConfig);

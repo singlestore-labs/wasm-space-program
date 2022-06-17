@@ -13,20 +13,18 @@ const PixiRoot = ({ children }: { children: React.ReactNode }) => {
   const { width, height } = useWindowSize();
 
   return (
-    <div>
-      <Stage
-        width={width}
-        height={height}
-        options={{
-          backgroundColor: colorToNumber(colors.black),
-          resolution: 2,
-          antialias: true,
-          autoDensity: true,
-        }}
-      >
-        {children}
-      </Stage>
-    </div>
+    <Stage
+      width={width}
+      height={height}
+      options={{
+        backgroundColor: colorToNumber(colors.black),
+        resolution: 2,
+        antialias: true,
+        autoDensity: true,
+      }}
+    >
+      {children}
+    </Stage>
   );
 };
 

@@ -1,10 +1,21 @@
 import { AssetSprite } from "@/components/AssetSprite";
-import { cellToWorld } from "@/data/coordinates";
+import {
+  cellToWorld,
+  Vector,
+  vectorAdd,
+  vectorDivide,
+  vectorEqual,
+  vectorMagnitude,
+  vectorMultiply,
+  vectorSubtract,
+} from "@/data/coordinates";
 import { EntityKind, EntityRow } from "@/data/queries";
+import { useTick } from "@inlet/react-pixi";
+import { useState } from "react";
 
 type Props = {
   entity: EntityRow;
-  follow: boolean;
+  follow?: boolean;
 };
 
 const EntityKindToName = {
@@ -14,7 +25,29 @@ const EntityKindToName = {
 
 export const Entity = ({ entity, follow }: Props) => {
   const name = EntityKindToName[entity.kind];
-  const [x, y] = cellToWorld(entity.x, entity.y);
+
+  const [position, setPosition] = useState([entity.x, entity.y] as Vector);
+  const [x, y] = cellToWorld(Math.round(position[0]), Math.round(position[1]));
+
+  useTick((delta: number) => {
+    if (vectorEqual(position, [entity.x, entity.y])) {
+      return;
+    }
+
+    const distance = vectorSubtract([entity.x, entity.y], position);
+    const distanceMagnitude = vectorMagnitude(distance);
+
+    if (distanceMagnitude < 1) {
+      return setPosition([entity.x, entity.y]);
+    }
+
+    const direction = vectorDivide(distance, distanceMagnitude);
+    const speed = delta * 0.1;
+    const newPosition = vectorAdd(position, vectorMultiply(direction, speed));
+    setPosition(newPosition);
+  }, entity.kind === EntityKind.Ship);
+
+  // TODO: need to know size - 1x or 2x
 
   return (
     <AssetSprite
@@ -24,7 +57,7 @@ export const Entity = ({ entity, follow }: Props) => {
       size="1x"
       x={x}
       y={y}
-      zIndex={-1 * entity.kind}
+      zIndex={entity.kind === EntityKind.Ship ? entity.eid : -1 * entity.eid}
     />
   );
 };

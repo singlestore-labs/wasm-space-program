@@ -9,6 +9,7 @@ type ViewportProps = {
   screenHeight: number;
   worldWidth: number;
   worldHeight: number;
+  clamp?: boolean;
 
   onBoundsChanged?: (bounds: PIXI.Rectangle) => void;
 
@@ -27,7 +28,8 @@ type PixiComponentViewportProps = ViewportProps & {
 
 const PixiComponentViewport = PixiComponent("Viewport", {
   create: (props: PixiComponentViewportProps) => {
-    const { screenWidth, screenHeight, worldWidth, worldHeight, app } = props;
+    const { screenWidth, screenHeight, worldWidth, worldHeight, clamp, app } =
+      props;
     const viewport = new PixiViewport({
       screenWidth,
       screenHeight,
@@ -41,6 +43,17 @@ const PixiComponentViewport = PixiComponent("Viewport", {
       minScale: 0.1,
       maxScale: 10,
     });
+
+    if (clamp) {
+      viewport.clamp({
+        left: 0,
+        right: worldWidth,
+        top: 0,
+        bottom: worldHeight,
+        direction: "all",
+        underflow: "center",
+      });
+    }
 
     // set initial values
     viewport.setZoom(props.initialScale);

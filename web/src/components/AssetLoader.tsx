@@ -6,19 +6,45 @@ if (import.meta.hot) {
 import { PixiLoader } from "@/components/PixiLoader";
 import spritesheetData from "@assets/sprites/spritesheet.json";
 import spritesheetUrl from "@assets/sprites/spritesheet.png";
+import starsTileUrl from "@assets/stars_tile.png";
 import { useApp } from "@inlet/react-pixi";
 import * as PIXI from "pixi.js";
 import { createContext, useEffect, useState } from "react";
 
+export const AssetContext = createContext({} as Assets);
+
 export type Assets = {
   spritesheet: PIXI.Spritesheet;
+  starsTile: PIXI.Texture;
 };
-
-export const AssetContext = createContext({} as Assets);
+type AssetName = keyof Assets;
 
 type Props = {
   children: React.ReactNode;
 };
+
+const loadTextures = (
+  app: PIXI.Application,
+  urls: { [key in AssetName]: string }
+): Promise<{ [key in AssetName]: PIXI.Texture }> =>
+  new Promise((resolve, reject) => {
+    for (const [name, url] of Object.entries(urls)) {
+      app.loader.add(name, url);
+    }
+
+    app.loader.load((_, resources) => {
+      const out = {} as { [key in AssetName]: PIXI.Texture };
+      for (const name of Object.keys(urls)) {
+        const maybeTexture = resources[name]?.texture;
+        if (maybeTexture) {
+          out[name as AssetName] = maybeTexture;
+        } else {
+          reject(new Error(`failed to load texture: ${name}`));
+        }
+      }
+      resolve(out);
+    });
+  });
 
 const createSpritesheet = (
   texture: PIXI.Texture,
@@ -31,24 +57,18 @@ const createSpritesheet = (
     });
   });
 
-const loadTexture = (
-  app: PIXI.Application,
-  url: string
-): Promise<PIXI.Texture> =>
-  new Promise((resolve, reject) => {
-    const maybeResource = app.loader.resources[url];
-    if (maybeResource?.texture) {
-      return resolve(maybeResource.texture);
-    }
-
-    app.loader.add(url).load((_, resources) => {
-      const resource = resources[url];
-      if (resource?.texture) {
-        resolve(resource.texture);
-      }
-      reject(new Error(`failed to load texture at url: ${url}`));
-    });
-  });
+const initializeAssets = async (textures: {
+  [key in AssetName]: PIXI.Texture;
+}): Promise<Assets> => {
+  const spritesheet = await createSpritesheet(
+    textures.spritesheet,
+    spritesheetData
+  );
+  return {
+    spritesheet,
+    starsTile: textures.starsTile,
+  };
+};
 
 export const AssetLoader = ({ children }: Props) => {
   const app = useApp();
@@ -57,9 +77,12 @@ export const AssetLoader = ({ children }: Props) => {
   useEffect(() => {
     setAssets(null);
     (async () => {
-      const texture = await loadTexture(app, spritesheetUrl);
-      const spritesheet = await createSpritesheet(texture, spritesheetData);
-      setAssets({ spritesheet });
+      const textures = await loadTextures(app, {
+        spritesheet: spritesheetUrl,
+        starsTile: starsTileUrl,
+      });
+      const assets = await initializeAssets(textures);
+      setAssets(assets);
     })();
   }, [app]);
 
