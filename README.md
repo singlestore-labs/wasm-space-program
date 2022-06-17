@@ -1,5 +1,38 @@
 # space game
 
+## Running this thing
+
+1. run singlestore in a docker container (make sure it has data api and wasm enabled) or maybe somewhere else if you are adventurous
+2. update backend/config.example.toml to point at your container
+   * database.host/database.port should point at the mysql endpoint of your singlestore cluster (one of the aggs)
+   * web.endpoints should be an array of urls to the data api port of your SingleStore cluster - the web frontend will load balance over these endpoints (i.e. you can provide workspace endpoints here)
+3. compile the agent:
+   ```bash
+   cd agent
+   cargo wasi build
+   ```
+4. run schema.sql on your singlestore cluster
+5. run the backend:
+   ```bash
+   cd backend
+   go build -o backend
+   ./backend --config config.example.toml
+   ```
+6. run the frontend
+   ```bash
+   cd web
+   yarn
+   yarn dev
+   ```
+7. open your browser to http://localhost:3000#cid=0
+8. create some entities with cid=0 (cid is the name of the solar system)
+
+Notice that the url contains useful things like the cid to look at. This will get fancier once I build the universe map, but till then you can look at solar systems by changing `cid=X` in the url.
+
+You can also add `debug=true` to see the grid and `play=true` for a simple sprite playground.
+
+Have fun!
+
 ## game world
 
 The game is set in space and composed of many independent solar systems.
