@@ -16,9 +16,11 @@ record entity {
     blasters: u8,
     thrusters: u8,
     harvesters: u8,
+
+    memory: u64,
 }
 
 pack: func(e: entity-summary) -> list<u8>
-step: func(e: entity, cell: list<u8>) -> u8
-decodecmd: func(m: u8) -> string
-applycmd: func(e: entity, cmd: u8) -> list<entity>
+step: func(e: entity, cell: list<u8>) -> u64
+decodecmd: func(m: u64) -> string
+applycmd: func(e: entity, cmd: u64) -> list<entity>

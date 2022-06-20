@@ -17,6 +17,11 @@ create rowstore table if not exists entity (
   thrusters   TINYINT  UNSIGNED NOT NULL DEFAULT 1,
   harvesters  TINYINT  UNSIGNED NOT NULL DEFAULT 1,
 
+  -- memory is 8 bytes
+  -- the first byte is this entities last action
+  -- the remaining bytes (7) can be used by the entity for any purpose
+  memory BIGINT UNSIGNED NOT NULL DEFAULT 0,
+
   PRIMARY KEY (cid, eid),
   SHARD KEY (cid)
 );
@@ -50,7 +55,8 @@ create view entity_next as (
         entity.shield,
         entity.blasters,
         entity.thrusters,
-        entity.harvesters
+        entity.harvesters,
+        entity.memory
       ),
       group_concat(pack(row(
         neighbor.kind,
@@ -58,7 +64,7 @@ create view entity_next as (
         neighbor.x,
         neighbor.y
       )) separator '')
-    ) as cmd
+    ) as memory
   from entity
   inner join entity neighbor on (
     entity.cid = neighbor.cid
@@ -72,7 +78,7 @@ drop view if exists debug_next;
 create view debug_next as (
   select
     entity.cid, entity.eid, entity.x, entity.y, 
-    decodecmd(cmd)
+    decodecmd(memory)
   from entity natural join entity_next
 );
 
@@ -153,9 +159,10 @@ begin
       entity.shield,
       entity.blasters,
       entity.thrusters,
-      entity.harvesters
+      entity.harvesters,
+      entity.memory
     ),
-    coalesce(entity_next.cmd, 0)
+    ifnull(entity_next.memory, 0) :> BIGINT UNSIGNED
   ) as applied
   set
     x = applied.x,
@@ -164,7 +171,8 @@ begin
     shield = applied.shield,
     blasters = applied.blasters,
     thrusters = applied.thrusters,
-    harvesters = applied.harvesters
+    harvesters = applied.harvesters,
+    memory = ifnull(entity_next.memory, entity.memory) :> BIGINT UNSIGNED
   where entity.kind = 1;
 
   -- resolve battles

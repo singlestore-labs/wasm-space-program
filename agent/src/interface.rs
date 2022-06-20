@@ -3,6 +3,7 @@ wit_bindgen_rust::export!("interface.wit");
 use crate::agent;
 use crate::cell::Cell;
 use crate::command::{Command, Component, Direction};
+use bytes_cast::{unaligned, BytesCast};
 pub use interface::{Entity, EntitySummary};
 use std::cmp;
 
@@ -12,20 +13,21 @@ impl interface::Interface for Interface {
         e.into()
     }
 
-    fn step(e: Entity, encoded_cell: Vec<u8>) -> u8 {
+    fn step(e: Entity, encoded_cell: Vec<u8>) -> u64 {
         let cell = Cell::try_from(encoded_cell).unwrap();
-        let command = agent::step(e, cell);
-        command.into()
+        let (command, memory) = agent::step(e, cell);
+        let mem = u64::from_ne_bytes(memory.as_bytes().try_into().unwrap());
+        command.with_memory(mem).into()
     }
 
-    fn decodecmd(m: u8) -> String {
+    fn decodecmd(m: u64) -> String {
         match Command::try_from(m) {
             Ok(cmd) => format!("{:?}", cmd),
             Err(e) => format!("error: {}", e),
         }
     }
 
-    fn applycmd(e: Entity, cmd: u8) -> Vec<Entity> {
+    fn applycmd(e: Entity, cmd: u64) -> Vec<Entity> {
         vec![match Command::try_from(cmd).unwrap() {
             Command::Hold => Entity {
                 energy: e.energy.saturating_sub(1),

@@ -2,6 +2,12 @@ const MASK_U2: u8 = 0b11;
 const MASK_U4: u8 = 0b1111;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommandWithMemory {
+    cmd: Command,
+    memory: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Command {
     Hold,
     Move(Direction, u8),
@@ -21,6 +27,15 @@ pub enum Component {
     Blasters = 0,
     Thrusters = 1,
     Harvesters = 2,
+}
+
+impl Command {
+    pub fn with_memory(&self, memory: u64) -> CommandWithMemory {
+        CommandWithMemory {
+            cmd: self.clone(),
+            memory,
+        }
+    }
 }
 
 impl TryFrom<u8> for Direction {
@@ -67,6 +82,16 @@ impl TryFrom<u8> for Command {
     }
 }
 
+impl TryFrom<u64> for Command {
+    type Error = &'static str;
+
+    fn try_from(v: u64) -> Result<Self, Self::Error> {
+        // command is stored in highest byte
+        let cmd: u8 = (v >> (8 * 7)) as u8;
+        Command::try_from(cmd)
+    }
+}
+
 impl From<Command> for u8 {
     fn from(cmd: Command) -> Self {
         match cmd {
@@ -83,6 +108,22 @@ impl From<Command> for u8 {
                 enc_cmd | enc_com
             }
         }
+    }
+}
+
+impl From<Command> for u64 {
+    fn from(cmd: Command) -> Self {
+        let enc: u8 = cmd.into();
+        // command is stored in the highest byte
+        (enc as u64) << (8 * 7)
+    }
+}
+
+impl From<CommandWithMemory> for u64 {
+    fn from(cm: CommandWithMemory) -> Self {
+        let enc: u8 = cm.cmd.into();
+        // command is stored in the highest byte
+        (enc as u64) << (8 * 7) & cm.memory
     }
 }
 

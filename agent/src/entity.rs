@@ -1,4 +1,5 @@
 use crate::cell::Cell;
+use crate::command::Command;
 use crate::interface::{Entity, EntitySummary};
 use crate::point::Point;
 use bytes_cast::{unaligned, BytesCast};
@@ -10,6 +11,15 @@ impl Entity {
             x: self.x as i32,
             y: self.y as i32,
         }
+    }
+
+    pub fn last_cmd(&self) -> Result<Command, &'static str> {
+        Command::try_from(self.memory)
+    }
+
+    pub fn memory_bytes(&self) -> Vec<u8> {
+        // mask out the highest byte as it contains the last command
+        self.memory.to_ne_bytes()[1..].into()
     }
 }
 
