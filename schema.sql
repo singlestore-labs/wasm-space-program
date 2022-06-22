@@ -17,10 +17,10 @@ create rowstore table if not exists entity (
   thrusters   TINYINT  UNSIGNED NOT NULL DEFAULT 1,
   harvesters  TINYINT  UNSIGNED NOT NULL DEFAULT 1,
 
-  -- memory is 8 bytes
-  -- the first byte is this entities last action
-  -- the remaining bytes (7) can be used by the entity for any purpose
-  memory BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  -- last_plan is 8 bytes
+  -- the first byte is the last command
+  -- the remaining bytes (7) is memory
+  last_plan BIGINT UNSIGNED NOT NULL DEFAULT 0,
 
   PRIMARY KEY (cid, eid),
   SHARD KEY (cid)
@@ -34,11 +34,11 @@ create or replace function step as wasm
   from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
-create or replace function decodecmd as wasm
+create or replace function decodeplan as wasm
   from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
-create or replace function applycmd returns table as wasm
+create or replace function applyplan returns table as wasm
   from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
@@ -55,16 +55,16 @@ create view entity_next as (
         entity.shield,
         entity.blasters,
         entity.thrusters,
-        entity.harvesters,
-        entity.memory
+        entity.harvesters
       ),
+      entity.last_plan,
       group_concat(pack(row(
         neighbor.kind,
         neighbor.blasters,
         neighbor.x,
         neighbor.y
       )) separator '')
-    ) as memory
+    ) as plan
   from entity
   inner join entity neighbor on (
     entity.cid = neighbor.cid
@@ -78,7 +78,7 @@ drop view if exists debug_next;
 create view debug_next as (
   select
     entity.cid, entity.eid, entity.x, entity.y, 
-    decodecmd(memory)
+    decodeplan(plan)
   from entity natural join entity_next
 );
 
@@ -150,7 +150,7 @@ begin
     entity.cid = entity_next.cid
     and entity.eid = entity_next.eid
   )
-  join applycmd(
+  join applyplan(
     row(
       entity.kind,
       entity.x,
@@ -159,10 +159,9 @@ begin
       entity.shield,
       entity.blasters,
       entity.thrusters,
-      entity.harvesters,
-      entity.memory
+      entity.harvesters
     ),
-    ifnull(entity_next.memory, 0) :> BIGINT UNSIGNED
+    ifnull(entity_next.plan, 0) :> BIGINT UNSIGNED
   ) as applied
   set
     x = applied.x,
@@ -172,7 +171,7 @@ begin
     blasters = applied.blasters,
     thrusters = applied.thrusters,
     harvesters = applied.harvesters,
-    memory = ifnull(entity_next.memory, entity.memory) :> BIGINT UNSIGNED
+    last_plan = ifnull(entity_next.plan, entity.last_plan) :> BIGINT UNSIGNED
   where entity.kind = 1;
 
   -- resolve battles

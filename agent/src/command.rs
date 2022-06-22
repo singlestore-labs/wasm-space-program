@@ -1,11 +1,9 @@
+use std::{cmp, fmt};
+
+use crate::interface::Entity;
+
 const MASK_U2: u8 = 0b11;
 const MASK_U4: u8 = 0b1111;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CommandWithMemory {
-    cmd: Command,
-    memory: u64,
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Command {
@@ -29,17 +27,57 @@ pub enum Component {
     Harvesters = 2,
 }
 
+#[derive(Debug)]
+pub enum CommandDecodeError {
+    ExtraBytes,
+    InvalidDirection,
+    InvalidComponent,
+    InvalidCommand,
+    BytesCastErr(bytes_cast::FromBytesError),
+}
+
 impl Command {
-    pub fn with_memory(&self, memory: u64) -> CommandWithMemory {
-        CommandWithMemory {
-            cmd: self.clone(),
-            memory,
+    pub fn energy_cost(&self) -> u16 {
+        match self {
+            Command::Hold => 1,
+            Command::Move(_, _) => 2,
+            Command::Upgrade(_) => 50,
+        }
+    }
+
+    pub fn apply(&self, e: &mut Entity) {
+        e.energy = e.energy.saturating_sub(self.energy_cost());
+        match self {
+            Command::Hold => {}
+            Command::Move(dir, dist) => match dir {
+                Direction::North => e.y = e.y.saturating_sub(*dist as u32),
+                Direction::East => e.x = cmp::min(e.x.saturating_add(*dist as u32), 99),
+                Direction::South => e.y = cmp::min(e.y.saturating_add(*dist as u32), 99),
+                Direction::West => e.x = e.x.saturating_sub(*dist as u32),
+            },
+            Command::Upgrade(comp) => match comp {
+                Component::Blasters => e.blasters = e.blasters.saturating_add(1),
+                Component::Thrusters => e.thrusters = e.thrusters.saturating_add(1),
+                Component::Harvesters => e.harvesters = e.harvesters.saturating_add(1),
+            },
+        }
+    }
+}
+
+impl fmt::Display for CommandDecodeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CommandDecodeError::ExtraBytes => write!(f, "extra bytes"),
+            CommandDecodeError::InvalidDirection => write!(f, "invalid direction"),
+            CommandDecodeError::InvalidComponent => write!(f, "invalid component"),
+            CommandDecodeError::InvalidCommand => write!(f, "invalid command"),
+            CommandDecodeError::BytesCastErr(e) => e.fmt(f),
         }
     }
 }
 
 impl TryFrom<u8> for Direction {
-    type Error = &'static str;
+    type Error = CommandDecodeError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         Ok(match value {
@@ -47,26 +85,26 @@ impl TryFrom<u8> for Direction {
             1 => Direction::East,
             2 => Direction::South,
             3 => Direction::West,
-            _ => return Err("Invalid direction"),
+            _ => return Err(CommandDecodeError::InvalidDirection),
         })
     }
 }
 
 impl TryFrom<u8> for Component {
-    type Error = &'static str;
+    type Error = CommandDecodeError;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         Ok(match value {
             0 => Component::Blasters,
             1 => Component::Thrusters,
             2 => Component::Harvesters,
-            _ => return Err("Invalid component"),
+            _ => return Err(CommandDecodeError::InvalidComponent),
         })
     }
 }
 
 impl TryFrom<u8> for Command {
-    type Error = &'static str;
+    type Error = CommandDecodeError;
 
     fn try_from(v: u8) -> Result<Self, Self::Error> {
         let cmd = v >> 6;
@@ -77,18 +115,8 @@ impl TryFrom<u8> for Command {
                 v & MASK_U4,
             )),
             0b10 => Ok(Command::Upgrade(Component::try_from(v & MASK_U2)?)),
-            _ => Err("Invalid command"),
+            _ => Err(CommandDecodeError::InvalidCommand),
         }
-    }
-}
-
-impl TryFrom<u64> for Command {
-    type Error = &'static str;
-
-    fn try_from(v: u64) -> Result<Self, Self::Error> {
-        // command is stored in highest byte
-        let cmd: u8 = (v >> (8 * 7)) as u8;
-        Command::try_from(cmd)
     }
 }
 
@@ -108,22 +136,6 @@ impl From<Command> for u8 {
                 enc_cmd | enc_com
             }
         }
-    }
-}
-
-impl From<Command> for u64 {
-    fn from(cmd: Command) -> Self {
-        let enc: u8 = cmd.into();
-        // command is stored in the highest byte
-        (enc as u64) << (8 * 7)
-    }
-}
-
-impl From<CommandWithMemory> for u64 {
-    fn from(cm: CommandWithMemory) -> Self {
-        let enc: u8 = cm.cmd.into();
-        // command is stored in the highest byte
-        (enc as u64) << (8 * 7) & cm.memory
     }
 }
 

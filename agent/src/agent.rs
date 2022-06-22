@@ -1,72 +1,68 @@
-use std::io::Read;
-
 use crate::cell::Cell;
-use crate::command::{Command, CommandWithMemory, Component};
+use crate::command::{Command, Component};
 use crate::interface::Entity;
+use crate::plan::AgentMemory;
 use crate::point::Point;
-use bytes_cast::{unaligned, BytesCast};
+use crate::strategy::{agent, agent_strategy};
 
-#[derive(BytesCast)]
-#[repr(C)]
-struct Memory {
-    last_shield: u8,
-    fear: u8,
-}
+mod strategy {
+    use super::*;
 
-pub fn step(e: Entity, cell: Cell) -> (Command, Memory) {
-    let memory_bytes = e.memory_bytes();
-    let (memory, _) = Memory::from_bytes(&memory_bytes).expect("failed to parse memory");
-    let mut newMemory = *memory.clone();
-    if memory.last_shield > e.shield {
-        // we're being attacked!
-        newMemory.fear = 1;
-    }
-
-    // consider gear upgrades
-    // TODO: only upgrade gear if we can get to a energy node with remaining energy
-    if e.harvesters < 2 && e.energy > 50 {
-        return (Command::Upgrade(Component::Harvesters), newMemory);
-    }
-    if e.thrusters < 2 && e.energy > 100 {
-        return (Command::Upgrade(Component::Thrusters), newMemory);
-    }
-    if e.blasters < 2 && e.energy > 100 {
-        return (Command::Upgrade(Component::Blasters), newMemory);
-    }
-    if e.harvesters < 5 && e.energy > 100 {
-        return (Command::Upgrade(Component::Harvesters), newMemory);
-    }
-    if e.thrusters < 5 && e.energy > 100 {
-        return (Command::Upgrade(Component::Thrusters), newMemory);
-    }
-    if e.blasters < 5 && e.energy > 100 {
-        return (Command::Upgrade(Component::Blasters), newMemory);
-    }
-
-    let position = e.position();
-
-    let mut target_distance: f32 = f32::MAX;
-    let mut target: Option<Point> = None;
-
-    for n in cell {
-        if n.kind == 2 {
-            let dist = position.distance(&n.position());
-            if dist < target_distance {
-                target_distance = dist;
-                target = Some(n.position());
-            }
+    agent_strategy! {
+        increment_memory(mem, _last, _e, _cell) => {
+            mem[0] = mem[0].saturating_add(10);
+            None
         }
     }
 
-    target
-        .map(|t| {
-            let (dir, mut dist) = position.direction_and_distance(&t);
-            if dist > 0 {
-                dist = dist.min(e.thrusters);
-                (Command::Move(dir, dist), newMemory)
-            } else {
-                (Command::Hold, newMemory)
+    agent_strategy! {
+        upgrade_harvestors(_mem, _last, e, _cell) =>
+            (e.harvesters < 2 && e.energy > 50).then(|| Command::Upgrade(Component::Harvesters))
+    }
+
+    agent_strategy! {
+        upgrade_thrusters(_mem, _last, e, _cell) =>
+            (e.thrusters < 2 && e.energy > 50).then(|| Command::Upgrade(Component::Thrusters))
+    }
+
+    agent_strategy! {
+        upgrade_blasters(_mem, _last, e, _cell) =>
+            (e.blasters < 2 && e.energy > 50).then(|| Command::Upgrade(Component::Blasters))
+    }
+
+    agent_strategy! {
+        chase_energy(_mem, _last, e, cell) => {
+            let position = e.position();
+
+            let mut target_distance: f32 = f32::MAX;
+            let mut target: Option<Point> = None;
+
+            for n in cell {
+                if n.is_energy_node() {
+                    let dist = position.distance(&n.position());
+                    if dist < target_distance {
+                        target_distance = dist;
+                        target = Some(n.position());
+                    }
+                }
             }
-        })
-        .unwrap_or((Command::Hold, newMemory))
+
+            target.and_then(|t| {
+                let (dir, mut dist) = position.direction_and_distance(&t);
+                (dist > 0).then(|| {
+                    dist = dist.min(e.thrusters);
+                    Command::Move(dir, dist)
+                })
+            })
+        }
+    }
 }
+
+agent!(
+    name = all_strategies,
+    strategy::increment_memory,
+    strategy::upgrade_blasters,
+    strategy::upgrade_harvestors,
+    strategy::upgrade_thrusters,
+    strategy::chase_energy,
+);
