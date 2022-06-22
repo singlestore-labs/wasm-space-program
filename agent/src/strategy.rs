@@ -4,10 +4,10 @@ macro_rules! agent {
             mem: &mut AgentMemory,
             last: &Command,
             entity: &Entity,
-            cell: &Cell,
+            system: &System,
         ) -> Option<Command> {
             $(
-                if let Some(cmd) = $strategies(mem, last, entity, cell) {
+                if let Some(cmd) = $strategies(mem, last, entity, system) {
                     return Some(cmd)
                 }
             )*
@@ -18,12 +18,12 @@ macro_rules! agent {
 }
 
 macro_rules! agent_strategy {
-    ( $name:ident($mem:ident, $last:ident, $entity:ident, $cell:ident) => $body:expr ) => {
+    ( $name:ident($mem:ident, $last:ident, $entity:ident, $system:ident) => $body:expr ) => {
         pub fn $name(
             $mem: &mut AgentMemory,
             $last: &Command,
             $entity: &Entity,
-            $cell: &Cell,
+            $system: &System,
         ) -> Option<Command> {
             $body
         }

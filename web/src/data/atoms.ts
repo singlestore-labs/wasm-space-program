@@ -59,7 +59,7 @@ export const viewportAtom = atomWithHash(
   }
 );
 
-export const cidAtom = atomWithHash<null | number>("cid", null, {
+export const sidAtom = atomWithHash<null | number>("sid", null, {
   replaceState: true,
 });
 

@@ -9,7 +9,7 @@ export const EntityKind = {
 export type EntityKind = keyof typeof EntityKind;
 
 export type EntityRow = {
-  cid: number;
+  sid: number;
   eid: number;
   kind: typeof EntityKind[keyof typeof EntityKind];
   x: number;
@@ -22,42 +22,42 @@ export type EntityRow = {
   harvesters: number;
 };
 
-export const queryEntities = (config: ClientConfig, cid: number) =>
+export const queryEntities = (config: ClientConfig, sid: number) =>
   Query<EntityRow>(
     config,
     `
       SELECT
-        cid, eid,
+        sid, eid,
         kind, x, y,
         energy, shield, blasters, thrusters, harvesters
       FROM entity
       WHERE
-        cid = ?
-      ORDER BY cid, eid
+        sid = ?
+      ORDER BY sid, eid
     `,
-    cid
+    sid
   );
 
 export const queryEntitiesInBounds = (
   config: ClientConfig,
-  cid: number,
+  sid: number,
   bounds: Bounds
 ) =>
   Query<EntityRow>(
     config,
     `
       SELECT
-        cid, eid,
+        sid, eid,
         kind, x, y,
         energy, shield, blasters, thrusters, harvesters
       FROM entity
       WHERE
-        cid = ?
+        sid = ?
         AND x >= ?  AND x < ?
         AND y >= ?  AND y < ?
-      ORDER BY cid, eid
+      ORDER BY sid, eid
     `,
-    cid,
+    sid,
     bounds.x,
     bounds.x + bounds.width,
     bounds.y,

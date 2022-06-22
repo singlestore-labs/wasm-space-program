@@ -6,11 +6,11 @@ use std::mem;
 use std::slice::Iter;
 
 #[derive(Clone)]
-pub struct Cell {
+pub struct System {
     entities: Vec<EntitySummary>,
 }
 
-impl<'a> IntoIterator for &'a Cell {
+impl<'a> IntoIterator for &'a System {
     type Item = &'a EntitySummary;
     type IntoIter = Iter<'a, EntitySummary>;
 
@@ -19,14 +19,17 @@ impl<'a> IntoIterator for &'a Cell {
     }
 }
 
-impl TryFrom<Vec<u8>> for Cell {
+impl TryFrom<Vec<u8>> for System {
     type Error = String;
 
     fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
         let packed_size = mem::size_of::<PackedEntitySummary>();
         let extra_bytes = value.len() % packed_size;
         if extra_bytes != 0 {
-            return Err(format!("cell is not a multiple of {} bytes", packed_size));
+            return Err(format!(
+                "packed system is not a multiple of {} bytes",
+                packed_size
+            ));
         }
 
         let count = value.len() / packed_size;
@@ -34,7 +37,7 @@ impl TryFrom<Vec<u8>> for Cell {
             Ok((entities, _)) => entities,
             Err(e) => return Err(format!("{}", e)),
         };
-        Ok(Cell {
+        Ok(System {
             entities: entities.iter().map(EntitySummary::from).collect(),
         })
     }

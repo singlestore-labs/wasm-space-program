@@ -1,6 +1,6 @@
 import { DebugPlayground } from "@/components/DebugPlayground";
 import { SolarSystem } from "@/components/SolarSystem";
-import { cidAtom, debugPlaygroundAtom } from "@/data/atoms";
+import { debugPlaygroundAtom, sidAtom } from "@/data/atoms";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { colors } from "@/theme";
 import { Text } from "@inlet/react-pixi";
@@ -10,7 +10,7 @@ import { TextStyle } from "pixi.js";
 export const Router = () => {
   const { width, height } = useWindowSize();
 
-  const cid = useAtomValue(cidAtom);
+  const sid = useAtomValue(sidAtom);
   const debugPlayground = useAtomValue(debugPlaygroundAtom);
 
   if (debugPlayground) {
@@ -18,8 +18,8 @@ export const Router = () => {
   }
 
   // determine if we are looking at a particular solar system or the entire universe
-  return cid !== null ? (
-    <SolarSystem width={width} height={height} cid={cid} />
+  return sid !== null ? (
+    <SolarSystem width={width} height={height} sid={sid} />
   ) : (
     <Text
       text="universe coming soon"

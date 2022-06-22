@@ -12,20 +12,20 @@ import { useContext } from "react";
 import useSWR from "swr";
 
 type Props = {
-  cid: number;
+  sid: number;
   width: number;
   height: number;
 };
 
 export const SolarSystem = (props: Props) => {
-  const { width, height, cid } = props;
+  const { width, height, sid } = props;
 
   const { starsTile } = useContext(AssetContext);
   const clientConfig = useAtomValue(clientConfigAtom);
 
   const { data: entities } = useSWR(
-    ["queryEntities", cid],
-    () => queryEntities(clientConfig, cid),
+    ["queryEntities", sid],
+    () => queryEntities(clientConfig, sid),
     {
       refreshInterval: 1000,
       dedupingInterval: 10,

@@ -28,10 +28,10 @@
    ```bash
    ./run_turns.sh
    ```
-8. open your browser to http://localhost:3000#cid=0
-9. create some entities with cid=0 (cid is the name of the solar system) (see schema.sql for examples)
+8. open your browser to http://localhost:3000#sid=0
+9. create some entities with sid=0 (sid is the id of the solar system) (see schema.sql for examples)
 
-Notice that the url contains useful things like the cid to look at. This will get fancier once I build the universe map, but till then you can look at solar systems by changing `cid=X` in the url.
+Notice that the url contains useful things like the sid to look at. This will get fancier once I build the universe map, but till then you can look at solar systems by changing `sid=X` in the url.
 
 You can also add `debug=true` to see the grid and `play=true` for a simple sprite playground.
 
@@ -107,5 +107,5 @@ The 5 low bits encode the argument
 ## turn order
 
 1. every entity chooses a single action to take
-   * entity's can only see the position and kind of every other object in the current cell
+   * entity's can only see the position and kind of every other object in the current solar system and less than 8 cells away
 2. 

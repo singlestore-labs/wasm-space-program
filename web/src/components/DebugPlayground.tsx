@@ -34,7 +34,7 @@ export const DebugPlayground = ({ width, height }: Props) => {
 
       <Entity
         entity={{
-          cid: 0,
+          sid: 0,
           eid: 1,
           kind: EntityKind.Ship,
           x: 20,

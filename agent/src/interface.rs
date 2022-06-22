@@ -1,9 +1,9 @@
 wit_bindgen_rust::export!("interface.wit");
 
 use crate::agent;
-use crate::cell::Cell;
 use crate::command::Command;
 use crate::plan::Plan;
+use crate::system::System;
 pub use interface::{Entity, EntitySummary};
 
 pub struct Interface;
@@ -12,13 +12,13 @@ impl interface::Interface for Interface {
         e.into()
     }
 
-    fn step(e: Entity, last_plan_enc: u64, encoded_cell: Vec<u8>) -> u64 {
+    fn step(e: Entity, last_plan_enc: u64, encoded_system: Vec<u8>) -> u64 {
         let last_plan: Plan = last_plan_enc.try_into().unwrap();
-        let cell = Cell::try_from(encoded_cell).unwrap();
+        let system = System::try_from(encoded_system).unwrap();
         let mut mem = last_plan.memory;
 
         let next_cmd =
-            agent::all_strategies(&mut mem, &last_plan.cmd, &e, &cell).unwrap_or(Command::Hold);
+            agent::all_strategies(&mut mem, &last_plan.cmd, &e, &system).unwrap_or(Command::Hold);
 
         Plan::new(next_cmd, mem)
             .try_into()

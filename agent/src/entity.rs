@@ -1,10 +1,10 @@
 use crate::interface::{Entity, EntitySummary};
 use crate::point::Point;
-use bytes_cast::{unaligned, BytesCast};
+use bytes_cast::BytesCast;
 
 pub mod kind {
     pub const SHIP: u8 = 1;
-    pub const ENERGY_NODE: u8 = 1;
+    pub const ENERGY_NODE: u8 = 2;
 }
 
 #[derive(BytesCast)]
@@ -12,8 +12,8 @@ pub mod kind {
 pub struct PackedEntitySummary {
     pub kind: u8,
     pub danger: u8,
-    pub x: unaligned::U32Ne,
-    pub y: unaligned::U32Ne,
+    pub x: u8,
+    pub y: u8,
 }
 
 impl Entity {
@@ -55,8 +55,8 @@ impl From<EntitySummary> for Vec<u8> {
         PackedEntitySummary {
             kind: e.kind,
             danger: e.danger,
-            x: e.x.into(),
-            y: e.y.into(),
+            x: e.x as u8,
+            y: e.y as u8,
         }
         .as_bytes()
         .into()
@@ -71,5 +71,21 @@ impl From<&PackedEntitySummary> for EntitySummary {
             x: e.x.into(),
             y: e.y.into(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn entity_packed_size() {
+        let ent = PackedEntitySummary {
+            kind: kind::SHIP,
+            danger: 0,
+            x: 128,
+            y: 128,
+        };
+        assert_eq!(ent.as_bytes().len(), 4);
     }
 }

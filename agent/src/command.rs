@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::{cmp, fmt};
 
 use crate::interface::Entity;
@@ -135,6 +136,19 @@ impl From<Command> for u8 {
                 let enc_com = (comp as u8) & MASK_U2;
                 enc_cmd | enc_com
             }
+        }
+    }
+}
+
+impl Direction {
+    pub fn random() -> Self {
+        let num: u8 = rand::thread_rng().gen_range(0..4);
+        match num {
+            0 => Direction::North,
+            1 => Direction::East,
+            2 => Direction::South,
+            3 => Direction::West,
+            _ => unreachable!(),
         }
     }
 }

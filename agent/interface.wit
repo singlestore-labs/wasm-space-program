@@ -21,6 +21,6 @@ record entity {
 }
 
 pack: func(e: entity-summary) -> list<u8>
-step: func(e: entity, last-plan: plan, cell: list<u8>) -> plan
+step: func(e: entity, last-plan: plan, system: list<u8>) -> plan
 decodeplan: func(p: plan) -> string
 applyplan: func(e: entity, p: plan) -> list<entity>
