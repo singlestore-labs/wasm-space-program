@@ -88,7 +88,7 @@ export const Router = () => {
         text="enter the universe"
         style={new TextStyle({ fontSize: 50, fill: colors.primary })}
         interactive
-        pointerdown={() => transitionToSolarSystem(0)}
+        pointerdown={() => setShowUniverseMap(true)}
       />
     );
   }
