@@ -1,13 +1,26 @@
 import { AssetLoader } from "@/components/AssetLoader";
 import { ErrorBoundary, ErrorOverlay } from "@/components/ErrorOverlay";
+import { InfoOverlay } from "@/components/InfoOverlay";
 import { PixiLoader } from "@/components/PixiLoader";
 import { Router } from "@/components/Router";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { ChakraProvider } from "@chakra-ui/react";
+import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
 import { Stage } from "@inlet/react-pixi";
 import React, { Suspense } from "react";
 import { render } from "react-dom";
-import { chakraTheme, colors, colorToNumber } from "./theme";
+import { chakraTheme } from "./theme";
+
+const SimpleLoader = () => (
+  <Center height="100vh">
+    <Spinner
+      size="xl"
+      speed="0.85s"
+      thickness="3px"
+      emptyColor="gray.200"
+      color="blue.500"
+    />
+  </Center>
+);
 
 const PixiRoot = ({ children }: { children: React.ReactNode }) => {
   const { width, height } = useWindowSize();
@@ -17,7 +30,7 @@ const PixiRoot = ({ children }: { children: React.ReactNode }) => {
       width={width}
       height={height}
       options={{
-        backgroundColor: colorToNumber(colors.black),
+        backgroundColor: 0x17075a,
         resolution: 2,
         antialias: true,
         autoDensity: true,
@@ -48,15 +61,19 @@ render(
   <React.StrictMode>
     <ChakraProvider theme={chakraTheme}>
       <ErrorOverlay>
-        <PixiRoot>
-          <ErrorBoundary>
-            <Suspense fallback={<PixiLoader />}>
-              <AssetLoader>
-                <Router />
-              </AssetLoader>
-            </Suspense>
-          </ErrorBoundary>
-        </PixiRoot>
+        <Suspense fallback={<SimpleLoader />}>
+          <InfoOverlay>
+            <PixiRoot>
+              <ErrorBoundary>
+                <Suspense fallback={<PixiLoader />}>
+                  <AssetLoader>
+                    <Router />
+                  </AssetLoader>
+                </Suspense>
+              </ErrorBoundary>
+            </PixiRoot>
+          </InfoOverlay>
+        </Suspense>
       </ErrorOverlay>
     </ChakraProvider>
   </React.StrictMode>,

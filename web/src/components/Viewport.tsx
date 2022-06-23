@@ -30,6 +30,7 @@ const PixiComponentViewport = PixiComponent("Viewport", {
   create: (props: PixiComponentViewportProps) => {
     const { screenWidth, screenHeight, worldWidth, worldHeight, clamp, app } =
       props;
+
     const viewport = new PixiViewport({
       screenWidth,
       screenHeight,

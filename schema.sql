@@ -1,6 +1,19 @@
 create database if not exists game;
 use game;
 
+create rowstore reference table if not exists turn_id_sequence (
+  next_val int primary key
+);
+insert into turn_id_sequence values (0);
+
+-- turns tracks stats about the last 100 turns
+create rowstore reference table if not exists turns (
+  slot BIGINT NOT NULL PRIMARY KEY,
+  tid BIGINT NOT NULL UNIQUE,
+  start_time DATETIME(6) DEFAULT NOW(6) SERIES TIMESTAMP,
+  end_time DATETIME(6) DEFAULT NULL
+);
+
 create rowstore table if not exists entity (
   sid BIGINT NOT NULL,
   eid BIGINT NOT NULL AUTO_INCREMENT,
@@ -13,9 +26,9 @@ create rowstore table if not exists entity (
 
   energy      SMALLINT UNSIGNED NOT NULL DEFAULT 100,
   shield      TINYINT  UNSIGNED NOT NULL DEFAULT 100,
-  blasters    TINYINT  UNSIGNED NOT NULL DEFAULT 1,
-  thrusters   TINYINT  UNSIGNED NOT NULL DEFAULT 1,
-  harvesters  TINYINT  UNSIGNED NOT NULL DEFAULT 1,
+  blasters    TINYINT  UNSIGNED NOT NULL DEFAULT 2,
+  thrusters   TINYINT  UNSIGNED NOT NULL DEFAULT 2,
+  harvesters  TINYINT  UNSIGNED NOT NULL DEFAULT 2,
 
   -- last_plan is 8 bytes
   -- the first byte is the last command
@@ -45,14 +58,14 @@ create view entity_next as (
       ),
       entity.last_plan,
       group_concat(pack(row(
-        neighbor.kind,
-        neighbor.blasters,
-        neighbor.x,
-        neighbor.y
+        coalesce(neighbor.kind, 0),
+        coalesce(neighbor.blasters, 0),
+        coalesce(neighbor.x, 0),
+        coalesce(neighbor.y, 0)
       )) separator '')
     ) as plan
   from entity
-  inner join entity neighbor on (
+  left join entity neighbor on (
     entity.sid = neighbor.sid
     and entity.eid != neighbor.eid
     -- entities can only see a certain radius around them
@@ -135,7 +148,15 @@ delimiter //
 
 create or replace procedure run_turn()
 as declare
+  turn_id bigint;
 begin
+  -- generate our turn id
+  update turn_id_sequence set next_val = last_insert_id(next_val + 1);
+  turn_id = last_insert_id();
+
+  -- start the turn timer
+  replace into turns (slot, tid) values (turn_id % 100, turn_id);
+
   -- gather and apply entity commands
   update entity
   left join entity_next on (
@@ -176,9 +197,8 @@ begin
 
   -- convert dead entities into energy nodes
   update entity
-  set
-    kind = 2
-  where shield <= 0;
+  set kind = 2
+  where shield <= 0 and kind = 1;
 
   -- entities harvest energy
   update entity
@@ -209,6 +229,9 @@ begin
 
   -- remove energyless entities
   delete from entity where energy <= 0;
+
+  -- finalize the turn
+  update turns set end_time = NOW(6) where tid = turn_id;
 
 end //
 

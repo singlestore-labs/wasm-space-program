@@ -34,16 +34,18 @@ impl interface::Interface for Interface {
 
     fn applyplan(e: Entity, p: u64) -> Vec<Entity> {
         let plan = Plan::try_from(p).expect("failed to decode plan");
+        let mut out = e;
 
         let cost = plan.cmd.energy_cost();
         if e.energy < cost {
             // not enough energy to execute the plan
-            return vec![e];
+            // consume one energy to do nothing
+            out.energy = out.energy.saturating_sub(1);
+        } else {
+            // apply command
+            plan.cmd.apply(&mut out);
         }
 
-        // apply command
-        let mut out = e;
-        plan.cmd.apply(&mut out);
         vec![out]
     }
 }

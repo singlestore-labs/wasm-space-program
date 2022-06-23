@@ -45,16 +45,16 @@ const colorscheme = {
     200: "#ebb642",
     900: "#3D2A02",
   },
+  white: "#ffffff",
 };
 
 export const colors = {
   ...colorscheme,
   gray: colorscheme.neutral,
   black: colorscheme.neutral[900],
-  white: colorscheme.neutral[0],
   primary: colorscheme.purple[200],
   text: {
-    default: colorscheme.neutral[0],
+    default: colorscheme.white,
     unfocused: colorscheme.neutral[200],
     disabled: colorscheme.neutral[500],
   },
@@ -69,9 +69,14 @@ export const chakraTheme = extendTheme({
     useSystemColorMode: false,
     initialColorMode: "dark",
   },
+  fontWeights: {
+    normal: 500,
+    medium: 700,
+    bold: 900,
+  },
   fonts: {
-    heading: "InterVariable, sans-serif",
-    body: "InterVariable, sans-serif",
+    heading: '"Source Code ProVariable", monospace',
+    body: '"Source Code ProVariable", monospace',
     mono: '"Source Code ProVariable", monospace',
   },
   colors,

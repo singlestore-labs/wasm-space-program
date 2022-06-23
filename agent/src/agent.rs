@@ -12,17 +12,17 @@ mod strategy {
 
     agent_strategy! {
         upgrade_harvestors(_mem, _last, e, _system) =>
-            (e.harvesters < 2 && e.energy > 50).then(|| Command::Upgrade(Component::Harvesters))
+            (e.harvesters < 5 && e.energy > 50).then(|| Command::Upgrade(Component::Harvesters))
     }
 
     agent_strategy! {
         upgrade_thrusters(_mem, _last, e, _system) =>
-            (e.thrusters < 2 && e.energy > 50).then(|| Command::Upgrade(Component::Thrusters))
+            (e.thrusters < 5 && e.energy > 50).then(|| Command::Upgrade(Component::Thrusters))
     }
 
     agent_strategy! {
         upgrade_blasters(_mem, _last, e, _system) =>
-            (e.blasters < 2 && e.energy > 50).then(|| Command::Upgrade(Component::Blasters))
+            (e.blasters < 5 && e.energy > 50).then(|| Command::Upgrade(Component::Blasters))
     }
 
     agent_strategy! {
@@ -79,9 +79,9 @@ mod strategy {
 
 agent!(
     name = all_strategies,
-    strategy::upgrade_blasters,
     strategy::upgrade_harvestors,
     strategy::upgrade_thrusters,
+    strategy::upgrade_blasters,
     strategy::chase_energy,
     strategy::random_move,
 );

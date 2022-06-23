@@ -1,5 +1,5 @@
 import { AssetSprite } from "@/components/AssetSprite";
-import { cellToWorld, CELL_SIZE_PX } from "@/data/coordinates";
+import { cellToWorld } from "@/data/coordinates";
 import { useEase } from "@/hooks/useEase";
 import { easeElasticOut } from "d3-ease";
 
@@ -26,9 +26,8 @@ export const Explosion = ({
   return (
     <AssetSprite
       name="explosion"
-      anchor={[0.5, 0.5]}
-      x={x + CELL_SIZE_PX / 2}
-      y={y + CELL_SIZE_PX / 2}
+      x={x}
+      y={y}
       scale={scale}
       alpha={progress > 0.5 ? 1 - progress : 1}
       zIndex={zIndex}

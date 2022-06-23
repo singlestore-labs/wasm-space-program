@@ -14,7 +14,6 @@ export const SpriteGrid = () => {
             key={`${name}_${i}_${size}`}
             name={name as SpriteName}
             variantIdx={i}
-            size={size}
             x={x}
             y={y}
           />

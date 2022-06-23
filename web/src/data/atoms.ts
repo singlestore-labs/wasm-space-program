@@ -13,7 +13,7 @@ export const debugPlaygroundAtom = atomWithHash("play", false, {
 
 export const unhandledErrorAtom = atom<null | Error>(null);
 
-const connectConfigAtom = atom(FetchConnectConfig);
+export const connectConfigAtom = atom(FetchConnectConfig);
 
 export const connectEndpointsAtom = atom(
   (get) => get(connectConfigAtom).endpoints
@@ -63,7 +63,6 @@ export const sidAtom = atomWithHash<null | number>("sid", null, {
   replaceState: true,
 });
 
-// use setFollowEntity(RESET) to clear
-export const followEntityAtom = atomWithHash<number | null>("follow", null);
+export const selectedEntityIdAtom = atom<number | null>(null);
 
 export const tickDurationMsAtom = atomFamily(() => atom(0));

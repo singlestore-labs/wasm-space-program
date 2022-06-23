@@ -1,4 +1,4 @@
-import { AssetSprite } from "@/components/AssetSprite";
+import { AssetSprite, SpriteName } from "@/components/AssetSprite";
 import {
   cellToWorld,
   Vector,
@@ -15,16 +15,15 @@ import { useState } from "react";
 
 type Props = {
   entity: EntityRow;
-  follow?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
 };
 
-const EntityKindToName = {
-  [EntityKind.Ship]: "ship" as const,
-  [EntityKind.EnergyNode]: "energyNode" as const,
-};
-
-export const Entity = ({ entity, follow }: Props) => {
-  const name = EntityKindToName[entity.kind];
+export const Entity = ({ entity, selected, onClick }: Props) => {
+  let name: SpriteName = "energyNode";
+  if (entity.kind === EntityKind.Ship) {
+    name = selected ? "shipEmpowered" : "ship";
+  }
 
   const [position, setPosition] = useState([entity.x, entity.y] as Vector);
   const [x, y] = cellToWorld(Math.round(position[0]), Math.round(position[1]));
@@ -45,19 +44,17 @@ export const Entity = ({ entity, follow }: Props) => {
     const speed = delta * 0.1;
     const newPosition = vectorAdd(position, vectorMultiply(direction, speed));
     setPosition(newPosition);
-  }, entity.kind === EntityKind.Ship);
-
-  // TODO: need to know size - 1x or 2x
+  }, entity.kind === EntityKind.Ship && !vectorEqual(position, [entity.x, entity.y]));
 
   return (
     <AssetSprite
       name={name}
-      tint={follow ? 0xff0000 : 0xffffff}
       variantIdx={entity.eid}
-      size="1x"
       x={x}
       y={y}
       zIndex={entity.kind === EntityKind.Ship ? entity.eid : -1 * entity.eid}
+      interactive={onClick !== undefined}
+      pointerdown={onClick}
     />
   );
 };

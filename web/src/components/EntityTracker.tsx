@@ -1,8 +1,8 @@
 import { Entity } from "@/components/Entity";
 import { Explosion } from "@/components/Explosion";
-import { followEntityAtom } from "@/data/atoms";
-import { EntityRow } from "@/data/queries";
-import { useAtomValue } from "jotai";
+import { selectedEntityIdAtom } from "@/data/atoms";
+import { EntityKind, EntityRow } from "@/data/queries";
+import { useAtom } from "jotai";
 import { useEffect, useReducer, useRef } from "react";
 import { useDebounce } from "rooks";
 
@@ -18,14 +18,10 @@ type Tracker = {
 // index of entities by entity id
 type EntityIndex = Map<number, Tracker>;
 
-// index mapping from cellX to cellY to list of entity ids
-type CellIndex = Map<number, Map<number, number[]>>;
-
 export const EntityTracker = ({ entities }: Props) => {
-  const followEntity = useAtomValue(followEntityAtom);
+  const [selectedEntity, setSelectedEntity] = useAtom(selectedEntityIdAtom);
 
   const entityIndexRef = useRef(new Map() as EntityIndex);
-  const cellIndexRef = useRef(new Map() as CellIndex);
 
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
   const debouncedForceUpdate = useDebounce(forceUpdate, 100);
@@ -33,11 +29,12 @@ export const EntityTracker = ({ entities }: Props) => {
   useEffect(() => {
     // when the entity list changes, we need to update the indexes accordingly
     const entityIndex = entityIndexRef.current;
-    const cellIndex = cellIndexRef.current;
 
     const newEntityById = new Map(
       entities.map((entity) => [entity.eid, entity])
     );
+
+    let numDead = 0;
 
     // update or kill previous entities
     for (const [eid, tracker] of entityIndex) {
@@ -46,23 +43,18 @@ export const EntityTracker = ({ entities }: Props) => {
       if (newEntity) {
         // update the tracker's entity
         tracker.entity = newEntity;
-
-        // an entity has died if it's kind has changed
-        if (tracker.entity.kind !== newEntity.kind) {
-          tracker.dead = true;
-        }
       } else {
-        tracker.dead = true;
+        if (tracker.entity.kind === EntityKind.Ship) {
+          // a missing ship is a dead ship
+          tracker.dead = true;
+        } else {
+          // a missing something else is just missing
+          entityIndex.delete(eid);
+        }
+      }
 
-        // if (tracker.entity.kind === EntityKind.Ship) {
-        //   // a missing ship is a dead ship
-        //   tracker.dead = true;
-        // }
-        // } else {
-        //   // a missing something else is just missing
-        //   // TODO: consider a "consuming" energy node animation
-        //   entityIndex.delete(eid);
-        // }
+      if (tracker.dead) {
+        numDead++;
       }
     }
 
@@ -70,6 +62,17 @@ export const EntityTracker = ({ entities }: Props) => {
     for (const entity of newEntityById.values()) {
       if (!entityIndex.has(entity.eid)) {
         entityIndex.set(entity.eid, { entity, dead: false });
+      }
+    }
+
+    // if there are many active dead entities, immediately remove all
+    // dead entities - this is a hack until explosion animations don't involve a
+    // ticker per component
+    if (numDead > 50) {
+      for (const [eid, tracker] of entityIndex) {
+        if (tracker.dead) {
+          entityIndex.delete(eid);
+        }
       }
     }
 
@@ -99,7 +102,8 @@ export const EntityTracker = ({ entities }: Props) => {
         <Entity
           key={tracker.entity.eid}
           entity={tracker.entity}
-          follow={tracker.entity.eid === followEntity}
+          selected={tracker.entity.eid === selectedEntity}
+          onClick={() => setSelectedEntity(tracker.entity.eid)}
         />
       );
     }
