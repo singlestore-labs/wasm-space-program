@@ -53,6 +53,7 @@ export const Entity = ({ entity, selected, onClick }: Props) => {
       x={x}
       y={y}
       zIndex={entity.kind === EntityKind.Ship ? entity.eid : -1 * entity.eid}
+      buttonMode
       interactive={onClick !== undefined}
       pointerdown={onClick}
     />

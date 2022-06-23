@@ -12,6 +12,7 @@ type ViewportProps = {
   clamp?: boolean;
 
   onBoundsChanged?: (bounds: PIXI.Rectangle) => void;
+  onScaleChanged?: (scale: number) => void;
 
   children?: React.ReactNode;
 };
@@ -41,8 +42,8 @@ const PixiComponentViewport = PixiComponent("Viewport", {
     });
 
     viewport.drag().pinch().wheel().clampZoom({
-      minScale: 0.1,
-      maxScale: 10,
+      minScale: 0.3,
+      maxScale: 5,
     });
 
     if (clamp) {
@@ -58,18 +59,20 @@ const PixiComponentViewport = PixiComponent("Viewport", {
 
     // set initial values
     viewport.setZoom(props.initialScale);
-    viewport.moveCorner(props.initialX, props.initialY);
+    viewport.moveCenter(props.initialX, props.initialY);
 
-    // trigger onBoundsChanged callback on initial values
+    // trigger callbacks on initial values
     props.onBoundsChanged?.(viewport.getVisibleBounds());
+    props.onScaleChanged?.(viewport.scale.x);
 
     viewport.on("moved-end", (viewport: PixiViewport) => {
       const {
-        corner: { x, y },
+        center: { x, y },
         scale: { _x: scale },
       } = viewport;
       props.setViewport({ x, y, scale });
       props.onBoundsChanged?.(viewport.getVisibleBounds());
+      props.onScaleChanged?.(viewport.scale.x);
     });
 
     return viewport;

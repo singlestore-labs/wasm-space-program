@@ -1,7 +1,9 @@
 export const SOLAR_SYSTEM_SIZE_CELLS = 100;
+export const UNIVERSE_SIZE_CELLS = 500;
 export const CELL_SIZE_PX = 40;
 
 export const SOLAR_SYSTEM_SIZE_PX = SOLAR_SYSTEM_SIZE_CELLS * CELL_SIZE_PX;
+export const UNIVERSE_SIZE_PX = UNIVERSE_SIZE_CELLS * CELL_SIZE_PX;
 
 export type Vector = [number, number];
 

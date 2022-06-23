@@ -29,7 +29,7 @@ export const DebugPlayground = ({ width, height }: Props) => {
         tilePosition={[0, 0]}
         tileScale={[1, 1]}
       />
-      <DebugGrid />
+      <DebugGrid width={SOLAR_SYSTEM_SIZE_PX} height={SOLAR_SYSTEM_SIZE_PX} />
       <SpriteGrid />
 
       <Entity

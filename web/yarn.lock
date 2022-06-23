@@ -1094,6 +1094,11 @@
   resolved "https://registry.yarnpkg.com/@pixi/filter-noise/-/filter-noise-6.4.2.tgz#588c779336716ce6ec1adabc75dd199c5fd262a8"
   integrity sha512-WvtpU1JHKujwoRHP7vqcOQ700ZH6faFXVSG6+ot9giJldk1sf5xNK7tKjSEkhcQgI7VwAqwMy/z4Jho+clCPgg==
 
+"@pixi/filter-zoom-blur@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-zoom-blur/-/filter-zoom-blur-4.1.5.tgz#7602636fc6b19c0c0f26cc4db26fb838593e5ae8"
+  integrity sha512-peynWrG88pF4GYXLLmrQFc1tl/yZWkE0Vken4i0I2rpwvUPkyzYPgMYeRUG+/DsP/q+5+dopnzHOrrdJORgF2w==
+
 "@pixi/graphics@6.4.2":
   version "6.4.2"
   resolved "https://registry.yarnpkg.com/@pixi/graphics/-/graphics-6.4.2.tgz#a3dadc078432b67d4606b1f05c5ab3fce80db40b"

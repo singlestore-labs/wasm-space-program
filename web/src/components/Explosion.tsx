@@ -16,11 +16,14 @@ export const Explosion = ({
   onAnimationComplete,
   zIndex,
 }: Props) => {
-  const [scale, progress] = useEase(easeElasticOut.amplitude(1).period(0.5), {
-    initialValue: 0.1,
-    duration: 800,
-    onComplete: onAnimationComplete,
-  });
+  const { value: scale, progress } = useEase(
+    easeElasticOut.amplitude(1).period(0.5),
+    {
+      initialValue: 0.1,
+      duration: 800,
+      onComplete: onAnimationComplete,
+    }
+  );
   const [x, y] = cellToWorld(cellX, cellY);
 
   return (

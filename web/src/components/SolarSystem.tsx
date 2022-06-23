@@ -17,6 +17,9 @@ type Props = {
   height: number;
 };
 
+const SOLAR_SYSTEM_MARGIN_PX = 800;
+const WORLD_SIZE_PX = SOLAR_SYSTEM_SIZE_PX + SOLAR_SYSTEM_MARGIN_PX * 2;
+
 export const SolarSystem = (props: Props) => {
   const { width, height, sid } = props;
 
@@ -24,7 +27,7 @@ export const SolarSystem = (props: Props) => {
   const clientConfig = useAtomValue(clientConfigAtom);
 
   const { data: entities } = useSWR(
-    ["queryEntities", sid],
+    ["queryEntities", sid, clientConfig],
     () => queryEntities(clientConfig, sid),
     {
       refreshInterval: 1000,
@@ -36,21 +39,30 @@ export const SolarSystem = (props: Props) => {
     <Viewport
       screenHeight={height}
       screenWidth={width}
-      worldHeight={SOLAR_SYSTEM_SIZE_PX}
-      worldWidth={SOLAR_SYSTEM_SIZE_PX}
+      worldHeight={WORLD_SIZE_PX}
+      worldWidth={WORLD_SIZE_PX}
       clamp
     >
       <TilingSprite
         texture={starsTile}
-        width={SOLAR_SYSTEM_SIZE_PX}
-        height={SOLAR_SYSTEM_SIZE_PX}
+        width={WORLD_SIZE_PX}
+        height={WORLD_SIZE_PX}
         tilePosition={[0, 0]}
         tileScale={[1, 1]}
       />
-      <DebugOnly>
-        <DebugGrid />
-      </DebugOnly>
-      <Container sortableChildren>
+      <Container
+        sortableChildren
+        x={SOLAR_SYSTEM_MARGIN_PX}
+        y={SOLAR_SYSTEM_MARGIN_PX}
+        width={SOLAR_SYSTEM_SIZE_PX}
+        height={SOLAR_SYSTEM_SIZE_PX}
+      >
+        <DebugOnly>
+          <DebugGrid
+            width={SOLAR_SYSTEM_SIZE_PX}
+            height={SOLAR_SYSTEM_SIZE_PX}
+          />
+        </DebugOnly>
         {entities && <EntityTracker entities={entities} />}
       </Container>
     </Viewport>

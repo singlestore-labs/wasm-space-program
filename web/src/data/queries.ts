@@ -24,6 +24,15 @@ export type EntityRow = {
   harvesters: number;
 };
 
+export type SolarSystemRow = {
+  sid: number;
+  x: number;
+  y: number;
+};
+
+export const querySolarSystems = (config: ClientConfig) =>
+  Query<SolarSystemRow>(config, `SELECT sid, x, y FROM solar_system`);
+
 export const queryEntities = (config: ClientConfig, sid: number) =>
   Query<EntityRow>(
     config,

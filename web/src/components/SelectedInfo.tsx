@@ -19,7 +19,7 @@ export const SelectedInfo = (props: Props) => {
   const [eid, setEid] = useAtom(selectedEntityIdAtom);
 
   const { data: entity } = useSWR(
-    ["queryEntity", eid],
+    ["queryEntity", eid, clientConfig],
     () => {
       if (eid !== null) {
         return queryEntity(clientConfig, eid);
@@ -53,7 +53,7 @@ export const SelectedInfo = (props: Props) => {
         fontSize="lg"
       >
         <Box flex={1}>
-          {kind}: 0x{entity.eid.toString(16).padStart(8, "0").toUpperCase()}
+          {kind}: 0x{entity.eid.toString(16).toUpperCase()}
         </Box>
         <IconButton
           aria-label="Close"

@@ -85,7 +85,7 @@ const WorkspaceDropdown = () => {
 const StatTable = () => {
   const clientConfig = useAtomValue(clientConfigAtom);
   const { data: stats } = useSWR(
-    "globalStats",
+    ["globalStats", clientConfig],
     () => queryGlobalStats(clientConfig),
     {
       refreshInterval: 1000,

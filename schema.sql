@@ -14,6 +14,13 @@ create rowstore reference table if not exists turns (
   end_time DATETIME(6) DEFAULT NULL
 );
 
+create table if not exists solar_system (
+  sid BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+
+  x INT UNSIGNED NOT NULL,
+  y INT UNSIGNED NOT NULL
+);
+
 create rowstore table if not exists entity (
   sid BIGINT NOT NULL,
   eid BIGINT NOT NULL AUTO_INCREMENT,
@@ -102,6 +109,15 @@ create view entity_damage as (
   )
   where a.kind = 1 and b.kind = 1
   group by a.sid, a.eid
+);
+
+drop view if exists cells_with_multiple_systems;
+create view cells_with_multiple_systems as (
+  select x, y from (
+    select x, y, count(*) as c from solar_system
+    group by x, y
+  )
+  where c > 1
 );
 
 drop view if exists cells_with_multiple_entities;
@@ -196,8 +212,7 @@ begin
   set entity.shield = entity.shield - entity_damage.damage;
 
   -- convert dead entities into energy nodes
-  update entity
-  set kind = 2
+  update entity set kind = 2
   where shield <= 0 and kind = 1;
 
   -- entities harvest energy
@@ -267,36 +282,46 @@ insert into entity set
     thrusters = 1,
     harvesters = 1;
 
-create table sids (sid bigint AUTO_INCREMENT primary key);
-insert into sids values (null);
-insert into sids select null from sids;
+-- generate solar systems
+insert into solar_system (x, y) values (floor(rand(now()) * 500), floor(rand(now() + 1) * 500));
+insert into solar_system (x, y) select floor(rand(now() + sid) * 500) x, floor(rand(now() + sid + 1) * 500) y from solar_system;
+
+-- remove solar_systems that overlap
+delete solar_system from solar_system
+join cells_with_multiple_systems mult
+on (solar_system.x = mult.x and solar_system.y = mult.y);
 
 -- create ships
 insert into entity (sid, eid, kind, x, y)
 select sid, null, 1, floor(rand(now() + sid) * 100), floor(rand(now() + sid + 1) * 100)
-from sids;
+from solar_system;
 
 insert into entity (sid, eid, kind, x, y)
 select sid, null, 1, floor(rand(now() + eid) * 100), floor(rand(now() + eid + 1) * 100)
-from entity;
+from entity where kind = 1 limit 50000;
 
 -- create energy nodes
 insert into entity (sid, eid, kind, x, y)
 select sid, null, 2, floor(rand(now() + sid) * 100), floor(rand(now() + sid + 1) * 100)
-from sids;
+from solar_system;
 
 insert into entity (sid, eid, kind, x, y)
 select sid, null, 2, floor(rand(now() + eid) * 100) as x, floor(rand(now() + eid + 1) * 100) as y
-from entity;
+from entity where kind = 2;
 
 -- remove cells containing multiple entities
 delete entity from entity
 join cells_with_multiple_entities mult
 on (entity.x = mult.x and entity.y = mult.y);
 
--- backup and restore
+-- backup
+drop database backup;
 create database backup;
+create table backup.solar_system as select * from game.solar_system;
 create table backup.entity as select * from game.entity;
+
+-- restore
+insert into game.solar_system select * from backup.solar_system;
 insert into game.entity select * from backup.entity;
 
 update entity

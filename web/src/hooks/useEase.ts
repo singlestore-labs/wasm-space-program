@@ -1,9 +1,10 @@
 import { useTick } from "@inlet/react-pixi";
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 
 type Options = {
   initialValue: number;
   duration: number;
+  onChange?: (value: number) => void;
   onComplete?: () => void;
   loop?: boolean;
 };
@@ -15,29 +16,24 @@ type State = {
   complete: boolean;
 };
 
-export const chainEaseFns =
-  (...fns: ((t: number) => number)[]) =>
-  (t: number) => {
-    const breakpoint = 1 / fns.length;
-    const idx = Math.floor(t / breakpoint);
-    const fn = fns[idx];
-    if (fn === undefined) {
-      return 1;
-    }
-    return fn(t * fns.length);
-  };
-
-//fns.reduce((acc, fn) => fn(acc), t);
+const clamp = (value: number, min: number, max: number) => {
+  return Math.min(Math.max(value, min), max);
+};
 
 export const useEase = (ease: (t: number) => number, opts: Options) => {
+  type Action =
+    | {
+        type: "tick";
+        deltaMS: number;
+      }
+    | {
+        type: "reset";
+      };
+
   const [{ value, progress, complete }, dispatch] = useReducer(
-    (s: State, deltaMS: number) => {
-      const time = s.time + deltaMS;
-      const progress = time / opts.duration;
-      const newComplete = time >= opts.duration;
-      if (newComplete && !s.complete) {
-        opts.onComplete?.();
-        if (opts.loop) {
+    (s: State, action: Action) => {
+      switch (action.type) {
+        case "reset": {
           return {
             time: 0,
             progress: 0,
@@ -45,18 +41,48 @@ export const useEase = (ease: (t: number) => number, opts: Options) => {
             complete: false,
           };
         }
+        case "tick": {
+          const time = s.time + action.deltaMS;
+          const progress = time / opts.duration;
+          const newComplete = time >= opts.duration;
+
+          const value = clamp(opts.initialValue + ease(progress), 0, 1);
+          opts.onChange?.(value);
+
+          if (newComplete && !s.complete) {
+            opts.onComplete?.();
+            if (opts.loop) {
+              return {
+                time: 0,
+                progress: 0,
+                value: opts.initialValue,
+                complete: false,
+              };
+            }
+          }
+
+          return {
+            time,
+            progress,
+            value,
+            complete: newComplete,
+          };
+        }
       }
-      return {
-        time,
-        progress,
-        value: opts.initialValue + ease(progress),
-        complete: newComplete,
-      };
     },
     { time: 0, progress: 0, value: opts.initialValue, complete: false }
   );
 
-  useTick((_, ticker) => dispatch(ticker.deltaMS), !complete);
+  useTick(
+    (_, ticker) =>
+      dispatch({
+        type: "tick",
+        deltaMS: ticker.deltaMS,
+      }),
+    !complete
+  );
 
-  return [value, progress, complete] as const;
+  const reset = useCallback(() => dispatch({ type: "reset" }), []);
+
+  return { value, progress, complete, reset };
 };
