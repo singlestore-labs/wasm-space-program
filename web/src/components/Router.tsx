@@ -1,5 +1,6 @@
 import { DebugPlayground } from "@/components/DebugPlayground";
 import { Minimap } from "@/components/Minimap";
+import { PixiLoader } from "@/components/PixiLoader";
 import { SolarSystem } from "@/components/SolarSystem";
 import { UniverseMap } from "@/components/UniverseMap";
 import { WarpTransition } from "@/components/WarpTransition";
@@ -54,8 +55,10 @@ export const Router = () => {
   if (transitioning) {
     return (
       <WarpTransition
-        durationMS={1000}
+        durationMS={3000}
         onComplete={() => setTransitioning(false)}
+        width={width}
+        height={height}
       />
     );
   } else if (showUniverseMap) {

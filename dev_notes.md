@@ -1,14 +1,15 @@
 # todo:
-* loading screen
 * hover system in universe - show info?
-* highlight current system
 * render minimap
+* highlight current system
+* highlight selected entity
+* show battle token on cells with battles
+  * or consider showing a counter on cells with multiple nodes
 * deploy to workspaces to see how this thing actually works
 * come up with a way to run custom queries against the demo
-    and quickly visualize the result
-* test attach/detach db to read workspaces for demo
+  * and quickly visualize the result
 * need to support multiple AIs
-    and ability to inject entitys with specific AIs at runtime
+  * and ability to inject entitys with specific AIs at runtime
 
 # future iteration is to add warp entities to adjacent solar systems
 

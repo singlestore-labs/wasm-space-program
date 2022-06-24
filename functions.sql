@@ -1,17 +1,17 @@
 create or replace function pack as wasm
-  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
 create or replace function step as wasm
-  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
 create or replace function decodeplan as wasm
-  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
 create or replace function applyplan returns table as wasm
-  from local infile "agent/target/wasm32-wasi/debug/agent.wasm"
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
 
 delimiter //

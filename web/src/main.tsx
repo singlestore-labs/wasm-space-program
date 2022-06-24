@@ -4,8 +4,9 @@ import { InfoOverlay } from "@/components/InfoOverlay";
 import { PixiLoader } from "@/components/PixiLoader";
 import { Router } from "@/components/Router";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { Center, ChakraProvider, Spinner } from "@chakra-ui/react";
-import { Stage } from "@inlet/react-pixi";
+import { Center, ChakraProvider, Spinner, useConst } from "@chakra-ui/react";
+import { Container, Stage } from "@inlet/react-pixi";
+import { CRTFilter } from "@pixi/filter-crt";
 import React, { Suspense } from "react";
 import { render } from "react-dom";
 import { chakraTheme } from "./theme";
@@ -24,6 +25,18 @@ const SimpleLoader = () => (
 
 const PixiRoot = ({ children }: { children: React.ReactNode }) => {
   const { width, height } = useWindowSize();
+  const filter = useConst(
+    () =>
+      new CRTFilter({
+        curvature: 10,
+        lineWidth: 1.5,
+        lineContrast: 0.4,
+        seed: Math.random(),
+        vignetting: 0.2,
+        vignettingAlpha: 0.4,
+        vignettingBlur: 0.7,
+      })
+  );
 
   return (
     <Stage
@@ -36,7 +49,7 @@ const PixiRoot = ({ children }: { children: React.ReactNode }) => {
         autoDensity: true,
       }}
     >
-      {children}
+      <Container filters={[filter]}>{children}</Container>
     </Stage>
   );
 };

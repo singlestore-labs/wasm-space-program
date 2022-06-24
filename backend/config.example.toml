@@ -9,7 +9,11 @@ password = "test"
 db = "game"
 
 [web]
-endpoints = ["http://127.0.0.1:9000", "http://127.0.0.1:9000"]
+endpoints = [
+    #"https://svc-55b6ef2e-e292-4faa-99c7-6ff848b1be68-dml.aws-cancentral-1.svc.singlestore.com",
+    #"https://svc-55b6ef2e-e292-4faa-8b23-43925070587d-dml.aws-cancentral-1.svc.singlestore.com",
+    "http://localhost:9000",
+]
 username = "web"
 password = "wasm-space-program"
 db = "game"

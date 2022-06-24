@@ -81,8 +81,11 @@ export const queryNumEntitiesByKind = (config: ClientConfig) =>
 export const queryAvgTurnTime = (config: ClientConfig) =>
   QueryOne<{ t: number }>(
     config,
-    "select avg(end_time - start_time) as t from turns where end_time is not null"
-  ).then((r) => r.t);
+    `
+      select avg(timestampdiff(microsecond, start_time, end_time)) as t
+      from turns where end_time is not null
+    `
+  ).then((r) => r.t / 1000);
 
 export const queryNumSystems = (config: ClientConfig) =>
   QueryOne<{ c: number }>(

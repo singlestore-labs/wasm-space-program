@@ -1069,6 +1069,11 @@
   resolved "https://registry.yarnpkg.com/@pixi/filter-alpha/-/filter-alpha-6.4.2.tgz#592f3285a86293d372c241c01530966f463d15d9"
   integrity sha512-If6a/tCPnFo0FQI/v6uy0OSqrNI8YMZMdcY7CfgklqDHx50CvhKp0d2tPYE4ETNgSpO883LARz6pi6yLAH83AA==
 
+"@pixi/filter-bloom@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-bloom/-/filter-bloom-4.1.5.tgz#f37dfebac6ccc45e546329390471f0fe8ea5d097"
+  integrity sha512-/u+9BNCGUU1Qc5DyThbQv3TRL2T7mQTLTXyiXN5itqo/+LtZ5J+yjw1sHw0pSLfWYAnYa+biq5rwO5jD7+yx8A==
+
 "@pixi/filter-blur@6.4.2":
   version "6.4.2"
   resolved "https://registry.yarnpkg.com/@pixi/filter-blur/-/filter-blur-6.4.2.tgz#85d5be4cf188ef9f33a2be4cee91607389221582"
@@ -1079,6 +1084,11 @@
   resolved "https://registry.yarnpkg.com/@pixi/filter-color-matrix/-/filter-color-matrix-6.4.2.tgz#313aa6df18dfe8d91049ee8aff4eafd22ef54e63"
   integrity sha512-IsR2piAxGmyesqZ4OlIyv5OvUkHx3K5iL+js6vricbcbBZA9fQUjTXdZmb7RloO6Po3Amze3f9ZkuLe4CNpUDQ==
 
+"@pixi/filter-crt@^4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-crt/-/filter-crt-4.1.6.tgz#4d2172f8f7a5a744a2e823c3db1d723ec0aa47ac"
+  integrity sha512-hV9wQh63Huud/fSwFwZ3MvKXDso4+gqe10/gOGwnA9bRtm5jMC2podjnZJiipEBs8nGtrPoCpUlkoaeWLVm+uA==
+
 "@pixi/filter-displacement@6.4.2":
   version "6.4.2"
   resolved "https://registry.yarnpkg.com/@pixi/filter-displacement/-/filter-displacement-6.4.2.tgz#3e9859783219eeb1b1629e52e8c738d56763b185"
@@ -1088,6 +1098,11 @@
   version "6.4.2"
   resolved "https://registry.yarnpkg.com/@pixi/filter-fxaa/-/filter-fxaa-6.4.2.tgz#29f4fe2a0dc073590561d7eb18aa84924a98a6da"
   integrity sha512-euUeo/FAQ9DfnRYmxcA9wqAzU8y3VRvgptuur/sFPGgWDQqoOOLzBqRDU8/Mhj0NM9ixswrUHBTg8FN5ToP2yw==
+
+"@pixi/filter-glitch@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-glitch/-/filter-glitch-4.1.5.tgz#b657a2a79eedc645b7a77e0afb96dbf7413c5e8b"
+  integrity sha512-x7l7XbrLqCoScYfRZmy/x1/KXOGXWpf7a4fcygc+n+jIm/IFwA93KvSJx9reBQzcONl5JXBOJVnFeLYcjP5J3w==
 
 "@pixi/filter-noise@6.4.2":
   version "6.4.2"

@@ -25,6 +25,7 @@ export const Sprites = {
   ] as const,
   wormhole: ["Wormhole_Opt1", "Wormhole_Opt2", "Wormhole_Opt3"] as const,
   solarSystem: ["SolarS_Opt1", "SolarS_Opt3"] as const,
+  logo: ["Logo1A_V1"] as const,
 };
 
 export type SpriteName = keyof typeof Sprites;
@@ -39,7 +40,7 @@ type Props = {
 export const AssetSprite = ({ name, variantIdx = 0, x, y, ...rest }: Props) => {
   const { spritesheet } = useContext(AssetContext);
   const variant = Sprites[name][variantIdx % Sprites[name].length];
-  const fullName = `${variant}_2x.png`;
+  const fullName = `${variant}.png`;
   const texture = spritesheet.textures[fullName];
 
   let width: number, height: number;

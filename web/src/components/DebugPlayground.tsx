@@ -1,10 +1,9 @@
 import { AssetContext } from "@/components/AssetLoader";
 import { DebugGrid } from "@/components/DebugGrid";
-import { Entity } from "@/components/Entity";
+import { PixiLoader } from "@/components/PixiLoader";
 import { SpriteGrid } from "@/components/SpriteGrid";
 import { Viewport } from "@/components/Viewport";
 import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
-import { EntityKind } from "@/data/queries";
 import { TilingSprite } from "@inlet/react-pixi";
 import { useContext } from "react";
 
@@ -32,20 +31,17 @@ export const DebugPlayground = ({ width, height }: Props) => {
       <DebugGrid width={SOLAR_SYSTEM_SIZE_PX} height={SOLAR_SYSTEM_SIZE_PX} />
       <SpriteGrid />
 
-      <Entity
-        entity={{
-          sid: 0,
-          eid: 1,
-          kind: EntityKind.Ship,
-          x: 20,
-          y: 20,
-          energy: 0,
-          shield: 0,
-          blasters: 0,
-          harvesters: 0,
-          thrusters: 0,
-        }}
-      />
+      <PixiLoader />
+
+      {/* <WarpTransition
+      
+        durationMS={3000}
+        onComplete={() => console.log("warp complete")}
+        x={500}
+        y={500}
+        width={500}
+        height={500}
+      /> */}
     </Viewport>
   );
 };

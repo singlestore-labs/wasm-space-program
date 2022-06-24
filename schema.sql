@@ -80,7 +80,7 @@ create view entity_next as (
     and distance_2d(
       entity.x, entity.y,
       neighbor.x, neighbor.y
-    ) < 32
+    ) < 16
   )
   where entity.kind = 1 -- ship
   group by entity.sid, entity.eid
@@ -171,7 +171,7 @@ begin
   turn_id = last_insert_id();
 
   -- start the turn timer
-  replace into turns (slot, tid) values (turn_id % 100, turn_id);
+  replace into turns (slot, tid) values (turn_id % 10, turn_id);
 
   -- gather and apply entity commands
   update entity
@@ -298,7 +298,7 @@ from solar_system;
 
 insert into entity (sid, eid, kind, x, y)
 select sid, null, 1, floor(rand(now() + eid) * 100), floor(rand(now() + eid + 1) * 100)
-from entity where kind = 1 limit 50000;
+from entity where kind = 1;
 
 -- create energy nodes
 insert into entity (sid, eid, kind, x, y)
@@ -315,14 +315,12 @@ join cells_with_multiple_entities mult
 on (entity.x = mult.x and entity.y = mult.y);
 
 -- backup
-drop database backup;
-create database backup;
-create table backup.solar_system as select * from game.solar_system;
-create table backup.entity as select * from game.entity;
+create table solar_system_backup as select * from solar_system;
+create table entity_backup as select * from entity;
 
 -- restore
-insert into game.solar_system select * from backup.solar_system;
-insert into game.entity select * from backup.entity;
+insert into solar_system select * from solar_system_backup;
+insert into entity select * from entity_backup;
 
 update entity
   set blasters = 10, harvesters = 50, thrusters = 10

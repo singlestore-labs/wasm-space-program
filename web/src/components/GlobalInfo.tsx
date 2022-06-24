@@ -100,7 +100,7 @@ const StatTable = () => {
   const info = [
     {
       label: "Average Turn Time",
-      value: formatMs(stats.avgTurnTime * 1000),
+      value: formatMs(stats.avgTurnTime),
     },
     {
       label: "# solar systems",
