@@ -3,6 +3,7 @@ import { DebugPlayground } from "@/components/DebugPlayground";
 import { SolarSystem } from "@/components/SolarSystem";
 import { UniverseMap } from "@/components/UniverseMap";
 import { WarpTransition } from "@/components/WarpTransition";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 import {
   debugPlaygroundAtom,
   selectedObjectAtom,
@@ -11,10 +12,7 @@ import {
 } from "@/data/atoms";
 import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
 import { useWindowSize } from "@/hooks/useWindowSize";
-import { colors } from "@/theme";
-import { Text, TilingSprite } from "@inlet/react-pixi";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { TextStyle } from "pixi.js";
 import { useCallback, useContext, useState } from "react";
 
 export const Router = () => {
@@ -92,25 +90,7 @@ export const Router = () => {
     );
   } else {
     return (
-      <>
-        <TilingSprite
-          texture={starsTile}
-          width={width}
-          height={height}
-          tilePosition={[0, 0]}
-          tileScale={[1, 1]}
-        />
-        <Text
-          x={width / 2}
-          y={height / 2}
-          anchor={0.5}
-          text="enter the universe"
-          style={new TextStyle({ fontSize: 50, fill: colors.primary })}
-          pointerdown={openUniverseMap}
-          interactive
-          buttonMode
-        />
-      </>
+      <WelcomeScreen width={width} height={height} onEnter={openUniverseMap} />
     );
   }
 };

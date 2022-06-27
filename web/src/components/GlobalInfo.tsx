@@ -6,6 +6,7 @@ import {
 } from "@/data/atoms";
 import { formatMs, formatNumber } from "@/data/format";
 import { queryGlobalStats } from "@/data/queries";
+import { InfoIcon } from "@chakra-ui/icons";
 import {
   Accordion,
   AccordionButton,
@@ -13,6 +14,7 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
+  Flex,
   HStack,
   Select,
 } from "@chakra-ui/react";
@@ -20,29 +22,64 @@ import { useAtom, useAtomValue } from "jotai";
 import { ChangeEvent } from "react";
 import useSWR from "swr";
 
-export const GlobalInfo = () => {
+type Props = {
+  onOpenInfo: () => void;
+};
+
+export const GlobalInfo = ({ onOpenInfo }: Props) => {
   return (
-    <Accordion backgroundColor="#311B92" border="2px solid #000" allowToggle>
-      <AccordionItem border={0}>
-        <AccordionButton borderBottom="2px solid #4f34c7">
-          <Box
-            flex={1}
-            pr={2}
-            textAlign="left"
-            color="#fff"
-            fontWeight={600}
-            fontSize="lg"
+    <>
+      <Flex
+        backgroundColor="#311B92"
+        border="2px 2px 0 2px solid #000"
+        borderBottom="2px solid #4f34c7"
+        px={4}
+        py={2}
+        position="relative"
+        _hover={{
+          backgroundColor: "#3a20ae",
+        }}
+        cursor="pointer"
+        onClick={onOpenInfo}
+      >
+        <Box flex={1} fontWeight={600} fontSize="lg">
+          Information
+        </Box>
+        <InfoIcon position="relative" top="5px" right="2px" />
+      </Flex>
+      <Accordion
+        backgroundColor="#311B92"
+        border="0 2px 2px 2px solid #000"
+        allowToggle
+        py={0}
+        my={0}
+      >
+        <AccordionItem border={0}>
+          <AccordionButton
+            borderBottom="2px solid #4f34c7"
+            _hover={{
+              backgroundColor: "#3a20ae",
+            }}
           >
-            Universe Stats
-          </Box>
-          <AccordionIcon />
-        </AccordionButton>
-        <AccordionPanel>
-          <WorkspaceDropdown />
-          <StatTable />
-        </AccordionPanel>
-      </AccordionItem>
-    </Accordion>
+            <Box
+              flex={1}
+              pr={2}
+              textAlign="left"
+              color="#fff"
+              fontWeight={600}
+              fontSize="lg"
+            >
+              Universe Stats
+            </Box>
+            <AccordionIcon />
+          </AccordionButton>
+          <AccordionPanel>
+            <WorkspaceDropdown />
+            <StatTable />
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 };
 

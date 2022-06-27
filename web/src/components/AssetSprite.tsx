@@ -125,3 +125,20 @@ export const AssetSprite = ({
     </>
   );
 };
+
+type BaseAssetSpriteProps = {
+  name: SpriteName;
+  variantIdx?: number;
+} & ComponentProps<typeof Sprite>;
+
+export const BaseAssetSprite = ({
+  name,
+  variantIdx = 0,
+  ...rest
+}: BaseAssetSpriteProps) => {
+  const { spritesheet } = useContext(AssetContext);
+  const variant = Sprites[name][variantIdx % Sprites[name].length];
+  const fullName = `${variant}.png`;
+  const texture = spritesheet.textures[fullName];
+  return <Sprite roundPixels texture={texture} {...rest} />;
+};

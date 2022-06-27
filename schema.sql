@@ -166,6 +166,8 @@ create or replace procedure run_turn()
 as declare
   turn_id bigint;
 begin
+  start transaction;
+
   -- generate our turn id
   update turn_id_sequence set next_val = last_insert_id(next_val + 1);
   turn_id = last_insert_id();
@@ -247,6 +249,10 @@ begin
 
   -- finalize the turn
   update turns set end_time = NOW(6) where tid = turn_id;
+
+  commit;
+
+exception when others then rollback;
 
 end //
 

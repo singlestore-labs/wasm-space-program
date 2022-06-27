@@ -80,4 +80,11 @@ export const chakraTheme = extendTheme({
     mono: '"Source Code ProVariable", monospace',
   },
   colors,
+  components: {
+    Link: {
+      baseStyle: {
+        color: "magenta.200",
+      },
+    },
+  },
 });
