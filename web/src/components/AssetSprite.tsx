@@ -30,12 +30,12 @@ export const Sprites = {
 
 export type SpriteName = keyof typeof Sprites;
 
-const SELECTED_COLORS_YELLOW = {
+export const SELECTED_COLORS_YELLOW = {
   fill: 0xfffade,
   stroke: 0xffb000,
 };
 
-const SELECTED_COLORS_PINK = {
+export const SELECTED_COLORS_PINK = {
   fill: 0xffbfff,
   stroke: 0xff00ff,
 };

@@ -1,6 +1,9 @@
+import { SOLAR_SYSTEM_SIZE_CELLS } from "@/data/coordinates";
+import { EntityKind } from "@/data/queries";
+import { Cell } from "@/hooks/useSolarSystemIndexes";
 import { Container, Graphics, Text } from "@inlet/react-pixi";
-import { Rectangle, TextStyle } from "pixi.js";
-import { useState } from "react";
+import { Graphics as PixiGraphics, Rectangle, TextStyle } from "pixi.js";
+import { useCallback, useState } from "react";
 
 type Props = {
   onOpenMap: () => void;
@@ -8,10 +11,31 @@ type Props = {
   y: number;
   width: number;
   height: number;
+  cells: Cell[];
+  viewport?: Rectangle;
 };
 
-export const Minimap = ({ onOpenMap, x, y, width, height }: Props) => {
+export const Minimap = ({
+  onOpenMap,
+  x,
+  y,
+  width,
+  height,
+  cells,
+  viewport,
+}: Props) => {
   const [hovering, setHovering] = useState(false);
+  const cellWidthPx = width / SOLAR_SYSTEM_SIZE_CELLS;
+  const cellHeightPx = height / SOLAR_SYSTEM_SIZE_CELLS;
+
+  const worldToMinimapCell = useCallback(
+    (cellX: number, cellY: number) => {
+      const x = cellX * cellWidthPx;
+      const y = cellY * cellHeightPx;
+      return [x, y] as const;
+    },
+    [cellWidthPx, cellHeightPx]
+  );
 
   let hoverOverlay;
   if (hovering) {
@@ -52,6 +76,65 @@ export const Minimap = ({ onOpenMap, x, y, width, height }: Props) => {
     );
   }
 
+  const drawCells = useCallback(
+    (g: PixiGraphics) => {
+      g.clear();
+
+      // draw bg
+      g.lineStyle({
+        width: 3,
+        color: 0x0,
+        alignment: 1,
+      });
+      g.beginFill(0x1e0a78);
+      g.drawRect(0, 0, width, height);
+      g.endFill();
+
+      // draw viewport
+      if (viewport) {
+        g.lineStyle({
+          width: 1,
+          color: 0xffffff,
+          alignment: 1,
+          native: true,
+        });
+        g.drawRect(viewport.x, viewport.y, viewport.width, viewport.height);
+      }
+
+      // reset linestyle
+      g.lineStyle(0, 0, 0);
+
+      // draw cells
+      for (const cell of cells) {
+        if (cell.kind === "entity") {
+          const { entity } = cell;
+          const [x, y] = worldToMinimapCell(entity.x, entity.y);
+          if (entity.kind === EntityKind.EnergyNode) {
+            g.beginFill(0x10e576);
+          } else if (entity.kind === EntityKind.Ship) {
+            g.beginFill(0xffffff);
+          }
+          g.drawRect(x, y, cellWidthPx, cellHeightPx);
+        } else if (cell.kind === "battle") {
+          const { entities } = cell;
+          const entity0 = entities[0];
+          const [x, y] = worldToMinimapCell(entity0.x, entity0.y);
+          g.beginFill(0xff0000);
+          g.drawRect(x, y, cellWidthPx, cellHeightPx);
+        }
+      }
+    },
+    [
+      cellHeightPx,
+      cellWidthPx,
+      cells,
+      height,
+      viewport,
+      width,
+      worldToMinimapCell,
+    ]
+  );
+
   return (
     <Container
       x={x}
@@ -65,14 +148,7 @@ export const Minimap = ({ onOpenMap, x, y, width, height }: Props) => {
       pointerout={() => setHovering(false)}
       pointerdown={onOpenMap}
     >
-      <Graphics
-        draw={(g) => {
-          g.clear();
-          g.beginFill(0x1e0a78);
-          g.drawRect(0, 0, width, height);
-          g.endFill();
-        }}
-      />
+      <Graphics draw={drawCells} />
       {hoverOverlay}
     </Container>
   );

@@ -1,5 +1,4 @@
 # todo:
-* render minimap
 * come up with a way to run custom queries against the demo
   * and quickly visualize the result
 * need to support multiple AIs

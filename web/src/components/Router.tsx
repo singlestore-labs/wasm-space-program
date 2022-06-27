@@ -1,6 +1,5 @@
 import { AssetContext } from "@/components/AssetLoader";
 import { DebugPlayground } from "@/components/DebugPlayground";
-import { Minimap } from "@/components/Minimap";
 import { SolarSystem } from "@/components/SolarSystem";
 import { UniverseMap } from "@/components/UniverseMap";
 import { WarpTransition } from "@/components/WarpTransition";
@@ -17,10 +16,6 @@ import { Text, TilingSprite } from "@inlet/react-pixi";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { TextStyle } from "pixi.js";
 import { useCallback, useContext, useState } from "react";
-
-const MINIMAP_WIDTH = 230;
-const MINIMAP_HEIGHT = 150;
-const MINIMAP_MARGIN = 16;
 
 export const Router = () => {
   const { width, height } = useWindowSize();
@@ -88,16 +83,12 @@ export const Router = () => {
     );
   } else if (sid !== null) {
     return (
-      <>
-        <SolarSystem width={width} height={height} sid={sid} />
-        <Minimap
-          x={width - MINIMAP_WIDTH - MINIMAP_MARGIN}
-          y={height - MINIMAP_HEIGHT - MINIMAP_MARGIN}
-          width={MINIMAP_WIDTH}
-          height={MINIMAP_HEIGHT}
-          onOpenMap={openUniverseMap}
-        />
-      </>
+      <SolarSystem
+        width={width}
+        height={height}
+        sid={sid}
+        onOpenMap={openUniverseMap}
+      />
     );
   } else {
     return (
