@@ -1,3 +1,4 @@
+import { AssetContext } from "@/components/AssetLoader";
 import { DebugPlayground } from "@/components/DebugPlayground";
 import { Minimap } from "@/components/Minimap";
 import { SolarSystem } from "@/components/SolarSystem";
@@ -12,10 +13,10 @@ import {
 import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { colors } from "@/theme";
-import { Text } from "@inlet/react-pixi";
+import { Text, TilingSprite } from "@inlet/react-pixi";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { TextStyle } from "pixi.js";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 
 const MINIMAP_WIDTH = 230;
 const MINIMAP_HEIGHT = 150;
@@ -28,6 +29,7 @@ export const Router = () => {
   const setViewport = useSetAtom(viewportAtom);
   const setSelectedObject = useSetAtom(selectedObjectAtom);
   const debugPlayground = useAtomValue(debugPlaygroundAtom);
+  const { starsTile } = useContext(AssetContext);
 
   const [showUniverseMap, setShowUniverseMap] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
@@ -99,14 +101,25 @@ export const Router = () => {
     );
   } else {
     return (
-      <Text
-        x={100}
-        y={100}
-        text="enter the universe"
-        style={new TextStyle({ fontSize: 50, fill: colors.primary })}
-        interactive
-        pointerdown={openUniverseMap}
-      />
+      <>
+        <TilingSprite
+          texture={starsTile}
+          width={width}
+          height={height}
+          tilePosition={[0, 0]}
+          tileScale={[1, 1]}
+        />
+        <Text
+          x={width / 2}
+          y={height / 2}
+          anchor={0.5}
+          text="enter the universe"
+          style={new TextStyle({ fontSize: 50, fill: colors.primary })}
+          pointerdown={openUniverseMap}
+          interactive
+          buttonMode
+        />
+      </>
     );
   }
 };

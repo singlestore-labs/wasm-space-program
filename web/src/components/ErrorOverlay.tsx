@@ -27,7 +27,9 @@ export const ErrorBoundary = ({ children }: Props) => {
   const setError = useSetAtom(unhandledErrorAtom);
   return (
     <ErrorBoundaryInternal onError={setError}>
-      <SWRConfig value={{ onError: setError }}>{children}</SWRConfig>
+      <SWRConfig value={{ onError: setError, dedupingInterval: 100 }}>
+        {children}
+      </SWRConfig>
     </ErrorBoundaryInternal>
   );
 };

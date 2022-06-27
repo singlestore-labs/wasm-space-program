@@ -65,7 +65,6 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
             key={sid}
             name="solarSystem"
             variantIdx={sid}
-            zIndex={0}
             x={worldX}
             y={worldY}
             interactive

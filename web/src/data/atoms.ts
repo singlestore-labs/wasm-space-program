@@ -64,7 +64,7 @@ export const sidAtom = atomWithHash<null | number>("sid", null, {
   replaceState: true,
 });
 
-type SelectedObject = {
+export type SelectedObject = {
   kind: EntityKind | "SolarSystem";
   id: number;
 };

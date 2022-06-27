@@ -1,30 +1,18 @@
 import { AssetSprite } from "@/components/AssetSprite";
 import { cellToWorld } from "@/data/coordinates";
-import { useEase } from "@/hooks/useEase";
 import { easeElasticOut } from "d3-ease";
 
 type Props = {
   cellX: number;
   cellY: number;
-  onAnimationComplete: () => void;
-  zIndex: number;
+  progress: number;
 };
 
-export const Explosion = ({
-  cellX,
-  cellY,
-  onAnimationComplete,
-  zIndex,
-}: Props) => {
-  const { value: scale, progress } = useEase(
-    easeElasticOut.amplitude(1).period(0.5),
-    {
-      initialValue: 0.1,
-      duration: 800,
-      onComplete: onAnimationComplete,
-    }
-  );
+const EASE = easeElasticOut.amplitude(1).period(0.5);
+
+export const Explosion = ({ cellX, cellY, progress }: Props) => {
   const [x, y] = cellToWorld(cellX, cellY);
+  const scale = EASE(progress);
 
   return (
     <AssetSprite
@@ -33,7 +21,6 @@ export const Explosion = ({
       y={y}
       scale={scale}
       alpha={progress > 0.5 ? 1 - progress : 1}
-      zIndex={zIndex}
     />
   );
 };

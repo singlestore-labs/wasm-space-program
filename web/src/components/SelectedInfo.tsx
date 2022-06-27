@@ -1,14 +1,21 @@
 import { StatList } from "@/components/StatList";
-import { clientConfigAtom, selectedObjectAtom } from "@/data/atoms";
+import {
+  clientConfigAtom,
+  SelectedObject,
+  selectedObjectAtom,
+} from "@/data/atoms";
 import { formatNumber } from "@/data/format";
 import {
+  EntityKind,
+  EntityKindsByValue,
+  EntityKindStrings,
   EntityRow,
-  queryEntity,
+  queryEntitiesByEntityLocation,
   querySolarSystem,
   SolarSystemInfoRow,
 } from "@/data/queries";
 import { CloseIcon } from "@chakra-ui/icons";
-import { Box, Flex, IconButton } from "@chakra-ui/react";
+import { Box, Flex, IconButton, Stack } from "@chakra-ui/react";
 import { useAtom, useAtomValue } from "jotai";
 import useSWR from "swr";
 
@@ -19,31 +26,31 @@ export const SelectedInfo = () => {
   const selectedKind = selectedObject?.kind;
   const paused = selectedKind === undefined;
 
-  const { data: entity } = useSWR(
-    ["queryEntity", selectedObject, clientConfig],
+  const { data: entities } = useSWR(
+    ["queryEntitiesByEntityLocation", selectedObject?.id, clientConfig],
     () => {
-      if (selectedObject !== null) {
-        return queryEntity(clientConfig, selectedObject.id);
+      if (selectedObject) {
+        return queryEntitiesByEntityLocation(clientConfig, selectedObject.id);
       }
     },
     {
       isPaused: () => paused || selectedKind === "SolarSystem",
       refreshInterval: 1000,
-      dedupingInterval: 10,
+      dedupingInterval: 1000,
     }
   );
 
   const { data: solarSystem } = useSWR(
     ["querySolarSystem", selectedObject, clientConfig],
     () => {
-      if (selectedObject !== null) {
+      if (selectedObject) {
         return querySolarSystem(clientConfig, selectedObject.id);
       }
     },
     {
       isPaused: () => paused || selectedKind !== "SolarSystem",
       refreshInterval: 1000,
-      dedupingInterval: 10,
+      dedupingInterval: 1000,
     }
   );
 
@@ -53,16 +60,42 @@ export const SelectedInfo = () => {
 
   const clearSelected = () => setSelectedObject(null);
 
-  if (selectedKind === "Ship" && entity) {
-    return <ShipInfo entity={entity} onClose={clearSelected} />;
+  const nodes = [];
+  if (entities) {
+    for (const entity of entities) {
+      if (entity.eid === selectedObject?.id) {
+        if (selectedKind === "Ship") {
+          nodes.push(
+            <ShipInfo
+              key={entity.eid}
+              entity={entity}
+              onClose={clearSelected}
+            />
+          );
+        } else if (selectedKind === "EnergyNode") {
+          nodes.push(
+            <EnergyNodeInfo
+              key={entity.eid}
+              entity={entity}
+              onClose={clearSelected}
+            />
+          );
+        }
+      } else {
+        nodes.push(
+          <NeighborEntity
+            key={entity.eid}
+            entity={entity}
+            onSelect={setSelectedObject}
+          />
+        );
+      }
+    }
+  } else if (solarSystem) {
+    nodes.push(<SolarSystemInfo key={solarSystem.sid} system={solarSystem} />);
   }
-  if (selectedKind === "EnergyNode" && entity) {
-    return <EnergyNodeInfo entity={entity} onClose={clearSelected} />;
-  }
-  if (selectedKind === "SolarSystem" && solarSystem) {
-    return <SolarSystemInfo system={solarSystem} />;
-  }
-  return null;
+
+  return <Stack>{nodes}</Stack>;
 };
 
 const ShipInfo = ({
@@ -141,7 +174,7 @@ type InfoBoxProps = {
   fill: string;
   title: string;
   onClose?: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 const InfoBox = ({ stroke, fill, title, onClose, children }: InfoBoxProps) => (
@@ -199,3 +232,32 @@ const HealthBar = ({ value }: { value: number }) => {
     </Box>
   );
 };
+
+const NeighborEntity = ({
+  entity,
+  onSelect,
+}: {
+  entity: EntityRow;
+  onSelect: (o: SelectedObject) => void;
+}) => (
+  <Box
+    key={entity.eid}
+    backgroundColor="#494552"
+    border="2px solid #858191"
+    minWidth={300}
+    _hover={{
+      backgroundColor: "#64606f",
+    }}
+    cursor="pointer"
+    onClick={() =>
+      onSelect({
+        kind: EntityKindsByValue[entity.kind] as EntityKind,
+        id: entity.eid,
+      })
+    }
+    px={2}
+    py={1}
+  >
+    {EntityKindStrings[entity.kind]}: 0x{entity.eid.toString(16).toUpperCase()}
+  </Box>
+);

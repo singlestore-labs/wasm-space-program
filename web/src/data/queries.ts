@@ -10,6 +10,11 @@ export type EntityKind = keyof typeof EntityKind;
 
 export const EntityKindsByValue = invert(EntityKind);
 
+export const EntityKindStrings = {
+  [EntityKind.Ship]: "Ship",
+  [EntityKind.EnergyNode]: "Energy Node",
+};
+
 export type EntityRow = {
   sid: number;
   eid: number;
@@ -82,6 +87,26 @@ export const queryEntities = (config: ClientConfig, sid: number) =>
       ORDER BY sid, eid
     `,
     sid
+  );
+
+export const queryEntitiesByEntityLocation = (
+  config: ClientConfig,
+  eid: number
+) =>
+  Query<EntityRow>(
+    config,
+    `
+      SELECT same_location.*
+      FROM entity
+      LEFT JOIN entity same_location ON (
+        entity.sid = same_location.sid
+        and entity.x = same_location.x
+        and entity.y = same_location.y
+      )
+      WHERE entity.eid = ?
+      ORDER BY same_location.eid
+    `,
+    eid
   );
 
 export const queryEntity = (config: ClientConfig, eid: number) =>

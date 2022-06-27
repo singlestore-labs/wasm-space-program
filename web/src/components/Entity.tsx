@@ -53,10 +53,9 @@ export const Entity = ({ entity, selected, energizing, onClick }: Props) => {
       variantIdx={entity.eid}
       x={x}
       y={y}
-      buttonMode
+      buttonMode={onClick !== undefined}
       interactive={onClick !== undefined}
       pointerdown={onClick}
-      zIndex={entity.eid}
       selected={selected}
     />
   );

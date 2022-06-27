@@ -57,7 +57,6 @@ type Props = {
   x: number;
   y: number;
   selected?: boolean;
-  zIndex: number;
 } & ComponentProps<typeof Sprite>;
 
 export const AssetSprite = ({
@@ -66,7 +65,6 @@ export const AssetSprite = ({
   x,
   y,
   selected,
-  zIndex,
   ...rest
 }: Props) => {
   const { spritesheet } = useContext(AssetContext);
@@ -90,7 +88,6 @@ export const AssetSprite = ({
       y={y - margin}
       width={CELL_SIZE_PX + margin * 2}
       height={CELL_SIZE_PX + margin * 2}
-      zIndex={zIndex}
       cacheAsBitmap
       draw={(ctx) => {
         const colors = nameToSelectedColors[name];
@@ -119,7 +116,6 @@ export const AssetSprite = ({
         roundPixels
         texture={texture}
         width={width}
-        zIndex={zIndex}
         height={height}
         anchor={[0.5, 0.5]}
         x={x + CELL_SIZE_PX / 2}

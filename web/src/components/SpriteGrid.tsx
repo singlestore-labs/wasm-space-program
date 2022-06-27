@@ -24,7 +24,6 @@ export const SpriteGrid = ({ selected }: Props) => {
           x={x * 2}
           y={y * 2}
           selected={selected}
-          zIndex={0}
         />
       );
     }

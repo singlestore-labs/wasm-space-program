@@ -1,10 +1,5 @@
 # todo:
-* hover system in universe - show info?
 * render minimap
-* highlight current system
-* highlight selected entity
-* show battle token on cells with battles
-  * or consider showing a counter on cells with multiple nodes
 * deploy to workspaces to see how this thing actually works
 * come up with a way to run custom queries against the demo
   * and quickly visualize the result

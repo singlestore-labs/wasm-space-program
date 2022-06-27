@@ -262,10 +262,10 @@ grant select on game.* to web;
 insert into entity
     (sid, eid,  kind,   x,  y, thrusters)
 values
-    (0,   null, 1,      0,  0, 2),
-    (0,   null, 1,     10, 10, 3),
-    (0,   null, 1,     20, 20, 4),
-    (0,   null, 1,     30, 40, 5);
+    (40275,   null, 1,      5,  5, 2),
+    (40275,   null, 1,     10, 10, 3),
+    (40275,   null, 2,     15, 15, 4),
+    (40275,   null, 1,     20, 20, 5);
 
 insert into entity (sid, eid,  kind,   x,  y)
 values

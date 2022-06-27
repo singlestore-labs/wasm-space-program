@@ -31,7 +31,7 @@ export const SolarSystem = (props: Props) => {
     () => queryEntities(clientConfig, sid),
     {
       refreshInterval: 1000,
-      dedupingInterval: 10,
+      dedupingInterval: 1000,
     }
   );
 
@@ -55,7 +55,6 @@ export const SolarSystem = (props: Props) => {
         y={SOLAR_SYSTEM_MARGIN_PX}
         width={SOLAR_SYSTEM_SIZE_PX}
         height={SOLAR_SYSTEM_SIZE_PX}
-        sortableChildren
       >
         <DebugOnly>
           <DebugGrid

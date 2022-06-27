@@ -73,3 +73,11 @@ export const vectorDivide = (a: Vector, b: number): Vector => [
 
 export const vectorEqual = (a: Vector, b: Vector): boolean =>
   a[0] === b[0] && a[1] === b[1];
+
+export const map1d = (x: number, y: number, width: number): number => {
+  return x + y * width;
+};
+
+export const map2d = (n: number, width: number): Vector => {
+  return [n % width, Math.floor(n / width)];
+};
