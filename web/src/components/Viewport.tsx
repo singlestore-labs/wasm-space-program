@@ -20,9 +20,9 @@ type ViewportProps = {
 type PixiComponentViewportProps = ViewportProps & {
   app: PIXI.Application;
 
-  initialX: number;
-  initialY: number;
-  initialScale: number;
+  x: number;
+  y: number;
+  scale: number;
 
   setViewport: (viewport: { x: number; y: number; scale: number }) => void;
 };
@@ -58,8 +58,8 @@ const PixiComponentViewport = PixiComponent("Viewport", {
     }
 
     // set initial values
-    viewport.setZoom(props.initialScale);
-    viewport.moveCenter(props.initialX, props.initialY);
+    viewport.setZoom(props.scale);
+    viewport.moveCenter(props.x, props.y);
 
     // trigger callbacks on initial values
     props.onBoundsChanged?.(viewport.getVisibleBounds());
@@ -77,6 +77,21 @@ const PixiComponentViewport = PixiComponent("Viewport", {
 
     return viewport;
   },
+
+  applyProps(instance, oldProps, newProps) {
+    if (oldProps.scale !== newProps.scale) {
+      instance.setZoom(newProps.scale);
+    }
+    if (oldProps.x !== newProps.x || oldProps.y !== newProps.y) {
+      instance.moveCenter(newProps.x, newProps.y);
+    }
+    if (
+      oldProps.screenWidth !== newProps.screenWidth ||
+      oldProps.screenHeight !== newProps.screenHeight
+    ) {
+      instance.resize(newProps.screenWidth, newProps.screenHeight);
+    }
+  },
 });
 
 export const Viewport = (props: ViewportProps) => {
@@ -87,9 +102,9 @@ export const Viewport = (props: ViewportProps) => {
     <PixiComponentViewport
       app={app}
       setViewport={setViewport}
-      initialScale={scale}
-      initialX={x}
-      initialY={y}
+      scale={scale}
+      x={x}
+      y={y}
       {...props}
     />
   );

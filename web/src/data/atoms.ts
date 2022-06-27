@@ -1,5 +1,6 @@
 import { FetchConnectConfig } from "@/data/backend";
 import { ClientConfig } from "@/data/client";
+import { EntityKind } from "@/data/queries";
 import { atom } from "jotai";
 import { atomFamily, atomWithHash } from "jotai/utils";
 
@@ -63,6 +64,11 @@ export const sidAtom = atomWithHash<null | number>("sid", null, {
   replaceState: true,
 });
 
-export const selectedEntityIdAtom = atom<number | null>(null);
+type SelectedObject = {
+  kind: EntityKind | "SolarSystem";
+  id: number;
+};
+
+export const selectedObjectAtom = atom<SelectedObject | null>(null);
 
 export const tickDurationMsAtom = atomFamily(() => atom(0));

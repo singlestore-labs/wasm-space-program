@@ -77,13 +77,15 @@ render(
         <Suspense fallback={<SimpleLoader />}>
           <InfoOverlay>
             <PixiRoot>
-              <ErrorBoundary>
-                <Suspense fallback={<PixiLoader />}>
-                  <AssetLoader>
-                    <Router />
-                  </AssetLoader>
-                </Suspense>
-              </ErrorBoundary>
+              <React.StrictMode>
+                <ErrorBoundary>
+                  <Suspense fallback={<PixiLoader />}>
+                    <AssetLoader>
+                      <Router />
+                    </AssetLoader>
+                  </Suspense>
+                </ErrorBoundary>
+              </React.StrictMode>
             </PixiRoot>
           </InfoOverlay>
         </Suspense>

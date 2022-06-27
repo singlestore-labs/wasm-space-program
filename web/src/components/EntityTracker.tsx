@@ -1,7 +1,7 @@
 import { Entity } from "@/components/Entity";
 import { Explosion } from "@/components/Explosion";
-import { selectedEntityIdAtom } from "@/data/atoms";
-import { EntityKind, EntityRow } from "@/data/queries";
+import { selectedObjectAtom } from "@/data/atoms";
+import { EntityKind, EntityKindsByValue, EntityRow } from "@/data/queries";
 import { useAtom } from "jotai";
 import { useEffect, useReducer, useRef } from "react";
 import { useDebounce } from "rooks";
@@ -19,7 +19,7 @@ type Tracker = {
 type EntityIndex = Map<number, Tracker>;
 
 export const EntityTracker = ({ entities }: Props) => {
-  const [selectedEntity, setSelectedEntity] = useAtom(selectedEntityIdAtom);
+  const [selectedEntity, setSelectedEntity] = useAtom(selectedObjectAtom);
 
   const entityIndexRef = useRef(new Map() as EntityIndex);
 
@@ -90,7 +90,7 @@ export const EntityTracker = ({ entities }: Props) => {
     if (tracker.dead) {
       nodes.push(
         <Explosion
-          zIndex={Infinity}
+          zIndex={Number.MAX_VALUE}
           key={tracker.entity.eid}
           cellX={tracker.entity.x}
           cellY={tracker.entity.y}
@@ -102,8 +102,16 @@ export const EntityTracker = ({ entities }: Props) => {
         <Entity
           key={tracker.entity.eid}
           entity={tracker.entity}
-          selected={tracker.entity.eid === selectedEntity}
-          onClick={() => setSelectedEntity(tracker.entity.eid)}
+          selected={
+            selectedEntity?.kind !== "SolarSystem" &&
+            tracker.entity.eid === selectedEntity?.id
+          }
+          onClick={() =>
+            setSelectedEntity({
+              id: tracker.entity.eid,
+              kind: EntityKindsByValue[tracker.entity.kind] as EntityKind,
+            })
+          }
         />
       );
     }

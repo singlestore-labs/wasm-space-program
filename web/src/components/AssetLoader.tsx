@@ -29,7 +29,9 @@ const loadTextures = (
 ): Promise<{ [key in AssetName]: PIXI.Texture }> =>
   new Promise((resolve, reject) => {
     for (const [name, url] of Object.entries(urls)) {
-      app.loader.add(name, url);
+      if (!app.loader.resources[name]) {
+        app.loader.add(name, url);
+      }
     }
 
     app.loader.load((_, resources) => {

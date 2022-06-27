@@ -12,7 +12,6 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
-  AccordionProps,
   Box,
   HStack,
   Select,
@@ -21,16 +20,9 @@ import { useAtom, useAtomValue } from "jotai";
 import { ChangeEvent } from "react";
 import useSWR from "swr";
 
-type Props = AccordionProps;
-
-export const GlobalInfo = (props: Props) => {
+export const GlobalInfo = () => {
   return (
-    <Accordion
-      {...props}
-      backgroundColor="#311B92"
-      border="2px solid #000"
-      allowToggle
-    >
+    <Accordion backgroundColor="#311B92" border="2px solid #000" allowToggle>
       <AccordionItem border={0}>
         <AccordionButton borderBottom="2px solid #4f34c7">
           <Box
@@ -63,7 +55,7 @@ const WorkspaceDropdown = () => {
 
   return (
     <HStack pt={1} pb={3}>
-      <Box fontSize="sm" flex={1}>
+      <Box fontSize="md" flex={1}>
         Workspace:
       </Box>
       <Select
@@ -120,5 +112,5 @@ const StatTable = () => {
     },
   ];
 
-  return <StatList minWidth={280} stats={info} />;
+  return <StatList minWidth={340} stats={info} />;
 };

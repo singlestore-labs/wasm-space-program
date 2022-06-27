@@ -1,87 +1,174 @@
 import { StatList } from "@/components/StatList";
-import { clientConfigAtom, selectedEntityIdAtom } from "@/data/atoms";
+import { clientConfigAtom, selectedObjectAtom } from "@/data/atoms";
 import { formatNumber } from "@/data/format";
 import {
-  EntityKind,
-  EntityKindsByValue,
   EntityRow,
   queryEntity,
+  querySolarSystem,
+  SolarSystemInfoRow,
 } from "@/data/queries";
 import { CloseIcon } from "@chakra-ui/icons";
-import { Box, BoxProps, Flex, IconButton } from "@chakra-ui/react";
+import { Box, Flex, IconButton } from "@chakra-ui/react";
 import { useAtom, useAtomValue } from "jotai";
 import useSWR from "swr";
 
-type Props = BoxProps;
-
-export const SelectedInfo = (props: Props) => {
+export const SelectedInfo = () => {
   const clientConfig = useAtomValue(clientConfigAtom);
-  const [eid, setEid] = useAtom(selectedEntityIdAtom);
+  const [selectedObject, setSelectedObject] = useAtom(selectedObjectAtom);
+
+  const selectedKind = selectedObject?.kind;
+  const paused = selectedKind === undefined;
 
   const { data: entity } = useSWR(
-    ["queryEntity", eid, clientConfig],
+    ["queryEntity", selectedObject, clientConfig],
     () => {
-      if (eid !== null) {
-        return queryEntity(clientConfig, eid);
+      if (selectedObject !== null) {
+        return queryEntity(clientConfig, selectedObject.id);
       }
     },
     {
-      isPaused: () => eid === null,
+      isPaused: () => paused || selectedKind === "SolarSystem",
       refreshInterval: 1000,
       dedupingInterval: 10,
     }
   );
 
-  if (eid === null || !entity) {
+  const { data: solarSystem } = useSWR(
+    ["querySolarSystem", selectedObject, clientConfig],
+    () => {
+      if (selectedObject !== null) {
+        return querySolarSystem(clientConfig, selectedObject.id);
+      }
+    },
+    {
+      isPaused: () => paused || selectedKind !== "SolarSystem",
+      refreshInterval: 1000,
+      dedupingInterval: 10,
+    }
+  );
+
+  if (paused) {
     return null;
   }
 
-  const kind = EntityKindsByValue[entity.kind];
+  const clearSelected = () => setSelectedObject(null);
 
-  return (
-    <Box
-      {...props}
-      backgroundColor="#311B92"
-      border="2px solid #FF00FF"
-      minWidth={300}
+  if (selectedKind === "Ship" && entity) {
+    return <ShipInfo entity={entity} onClose={clearSelected} />;
+  }
+  if (selectedKind === "EnergyNode" && entity) {
+    return <EnergyNodeInfo entity={entity} onClose={clearSelected} />;
+  }
+  if (selectedKind === "SolarSystem" && solarSystem) {
+    return <SolarSystemInfo system={solarSystem} />;
+  }
+  return null;
+};
+
+const ShipInfo = ({
+  entity,
+  onClose,
+}: {
+  entity: EntityRow;
+  onClose: () => void;
+}) => (
+  <InfoBox
+    stroke="#ff00ff"
+    fill="#b300b3"
+    title={`Ship: 0x${entity.eid.toString(16).toUpperCase()}`}
+    onClose={onClose}
+  >
+    <HealthBar value={entity.shield} />
+    <StatList
+      p={2}
+      stats={[
+        { label: "Energy", value: formatNumber(entity.energy) },
+        { label: "Blasters", value: formatNumber(entity.blasters) },
+        { label: "Thrusters", value: formatNumber(entity.thrusters) },
+        { label: "Harvesters", value: formatNumber(entity.harvesters) },
+      ]}
+    />
+  </InfoBox>
+);
+
+const EnergyNodeInfo = ({
+  entity,
+  onClose,
+}: {
+  entity: EntityRow;
+  onClose: () => void;
+}) => (
+  <InfoBox
+    stroke="#ff00ff"
+    fill="#b300b3"
+    title={`Energy Node: 0x${entity.eid.toString(16).toUpperCase()}`}
+    onClose={onClose}
+  >
+    <StatList
+      p={2}
+      stats={[{ label: "Energy", value: formatNumber(entity.energy) }]}
+    />
+  </InfoBox>
+);
+
+const SolarSystemInfo = ({ system }: { system: SolarSystemInfoRow }) => (
+  <InfoBox
+    stroke="#FFB000"
+    fill="#9E6D00"
+    title={`Solar System: 0x${system.sid.toString(16).toUpperCase()}`}
+  >
+    <StatList
+      p={2}
+      stats={[{ label: "# Ships", value: formatNumber(system.numShips) }]}
+    />
+    <StatList
+      p={2}
+      stats={[
+        { label: "# Energy Nodes", value: formatNumber(system.numEnergyNodes) },
+      ]}
+    />
+    <StatList
+      p={2}
+      stats={[
+        { label: "Total Energy", value: formatNumber(system.totalEnergy) },
+      ]}
+    />
+  </InfoBox>
+);
+
+type InfoBoxProps = {
+  stroke: string;
+  fill: string;
+  title: string;
+  onClose?: () => void;
+  children: React.ReactNode;
+};
+
+const InfoBox = ({ stroke, fill, title, onClose, children }: InfoBoxProps) => (
+  <Box backgroundColor="#311B92" border={`2px solid ${stroke}`} minWidth={300}>
+    <Flex
+      backgroundColor={fill}
+      padding={2}
+      color="#fff"
+      fontWeight={600}
+      fontSize="lg"
     >
-      <Flex
-        backgroundColor="#B300B3"
-        padding={2}
-        color="#fff"
-        fontWeight={600}
-        fontSize="lg"
-      >
-        <Box flex={1}>
-          {kind}: 0x{entity.eid.toString(16).toUpperCase()}
-        </Box>
+      <Box flex={1}>{title}</Box>
+      {onClose && (
         <IconButton
           aria-label="Close"
           icon={<CloseIcon />}
           size="xs"
           variant="outline"
-          onClick={() => setEid(null)}
+          onClick={onClose}
         />
-      </Flex>
-      {entity.kind === EntityKind.Ship ? (
-        <>
-          <HealthBar value={entity.shield} />
-          <ShipStats entity={entity} />
-        </>
-      ) : (
-        <>
-          <EnergyNodeStats entity={entity} />
-        </>
       )}
-    </Box>
-  );
-};
+    </Flex>
+    {children}
+  </Box>
+);
 
-type ShieldBarProps = {
-  value: number;
-};
-
-export const HealthBar = ({ value }: ShieldBarProps) => {
+const HealthBar = ({ value }: { value: number }) => {
   return (
     <Box
       borderWidth="2px 0px"
@@ -111,29 +198,4 @@ export const HealthBar = ({ value }: ShieldBarProps) => {
       </Flex>
     </Box>
   );
-};
-
-type ShipStatsProps = {
-  entity: EntityRow;
-};
-
-export const ShipStats = ({ entity }: ShipStatsProps) => {
-  const stats = [
-    { label: "Energy", value: formatNumber(entity.energy) },
-    { label: "Blasters", value: formatNumber(entity.blasters) },
-    { label: "Thrusters", value: formatNumber(entity.thrusters) },
-    { label: "Harvesters", value: formatNumber(entity.harvesters) },
-  ];
-
-  return <StatList p={2} stats={stats} />;
-};
-
-type EnergyNodeStatsProps = {
-  entity: EntityRow;
-};
-
-export const EnergyNodeStats = ({ entity }: EnergyNodeStatsProps) => {
-  const stats = [{ label: "Energy", value: formatNumber(entity.energy) }];
-
-  return <StatList p={2} stats={stats} />;
 };

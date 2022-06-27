@@ -1,6 +1,6 @@
 import { AssetContext } from "@/components/AssetLoader";
 import { CELL_SIZE_PX } from "@/data/coordinates";
-import { Sprite } from "@inlet/react-pixi";
+import { Graphics, Sprite } from "@inlet/react-pixi";
 import { ComponentProps, useContext } from "react";
 
 export const Sprites = {
@@ -30,14 +30,45 @@ export const Sprites = {
 
 export type SpriteName = keyof typeof Sprites;
 
+const SELECTED_COLORS_YELLOW = {
+  fill: 0xfffade,
+  stroke: 0xffb000,
+};
+
+const SELECTED_COLORS_PINK = {
+  fill: 0xffbfff,
+  stroke: 0xff00ff,
+};
+
+const nameToSelectedColors = {
+  ship: SELECTED_COLORS_PINK,
+  shipEmpowered: SELECTED_COLORS_PINK,
+  battle: SELECTED_COLORS_PINK,
+  explosion: SELECTED_COLORS_PINK,
+  energyNode: SELECTED_COLORS_PINK,
+  wormhole: SELECTED_COLORS_PINK,
+  solarSystem: SELECTED_COLORS_YELLOW,
+  logo: SELECTED_COLORS_PINK,
+};
+
 type Props = {
   name: SpriteName;
   variantIdx?: number;
   x: number;
   y: number;
+  selected?: boolean;
+  zIndex: number;
 } & ComponentProps<typeof Sprite>;
 
-export const AssetSprite = ({ name, variantIdx = 0, x, y, ...rest }: Props) => {
+export const AssetSprite = ({
+  name,
+  variantIdx = 0,
+  x,
+  y,
+  selected,
+  zIndex,
+  ...rest
+}: Props) => {
   const { spritesheet } = useContext(AssetContext);
   const variant = Sprites[name][variantIdx % Sprites[name].length];
   const fullName = `${variant}.png`;
@@ -52,16 +83,49 @@ export const AssetSprite = ({ name, variantIdx = 0, x, y, ...rest }: Props) => {
     height = CELL_SIZE_PX;
   }
 
-  return (
-    <Sprite
-      roundPixels
-      texture={texture}
-      width={width}
-      height={height}
-      anchor={[0.5, 0.5]}
-      x={x + CELL_SIZE_PX / 2}
-      y={y + CELL_SIZE_PX / 2}
-      {...rest}
+  const margin = 4;
+  const selectedBg = (
+    <Graphics
+      x={x - margin}
+      y={y - margin}
+      width={CELL_SIZE_PX + margin * 2}
+      height={CELL_SIZE_PX + margin * 2}
+      zIndex={zIndex}
+      cacheAsBitmap
+      draw={(ctx) => {
+        const colors = nameToSelectedColors[name];
+        ctx.clear();
+        ctx.lineStyle({
+          width: 2,
+          color: colors.stroke,
+          alignment: 0,
+        });
+        ctx.beginFill(colors.fill, 1);
+        ctx.drawRect(
+          0,
+          0,
+          CELL_SIZE_PX + margin * 2,
+          CELL_SIZE_PX + margin * 2
+        );
+        ctx.endFill();
+      }}
     />
+  );
+
+  return (
+    <>
+      {selected && selectedBg}
+      <Sprite
+        roundPixels
+        texture={texture}
+        width={width}
+        zIndex={zIndex}
+        height={height}
+        anchor={[0.5, 0.5]}
+        x={x + CELL_SIZE_PX / 2}
+        y={y + CELL_SIZE_PX / 2}
+        {...rest}
+      />
+    </>
   );
 };

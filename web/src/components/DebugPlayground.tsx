@@ -1,10 +1,9 @@
 import { AssetContext } from "@/components/AssetLoader";
 import { DebugGrid } from "@/components/DebugGrid";
-import { PixiLoader } from "@/components/PixiLoader";
 import { SpriteGrid } from "@/components/SpriteGrid";
 import { Viewport } from "@/components/Viewport";
-import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
-import { TilingSprite } from "@inlet/react-pixi";
+import { CELL_SIZE_PX, SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
+import { Container, TilingSprite } from "@inlet/react-pixi";
 import { useContext } from "react";
 
 type Props = {
@@ -29,9 +28,14 @@ export const DebugPlayground = ({ width, height }: Props) => {
         tileScale={[1, 1]}
       />
       <DebugGrid width={SOLAR_SYSTEM_SIZE_PX} height={SOLAR_SYSTEM_SIZE_PX} />
-      <SpriteGrid />
+      <Container x={CELL_SIZE_PX*30} y={CELL_SIZE_PX*30}>
+        <SpriteGrid />
+      </Container>
+      <Container x={CELL_SIZE_PX*44} y={CELL_SIZE_PX*30}>
+        <SpriteGrid selected />
+      </Container>
 
-      <PixiLoader />
+      {/* <PixiLoader /> */}
 
       {/* <WarpTransition
       

@@ -16,13 +16,14 @@ import { useState } from "react";
 type Props = {
   entity: EntityRow;
   selected?: boolean;
+  energizing?: boolean;
   onClick?: () => void;
 };
 
-export const Entity = ({ entity, selected, onClick }: Props) => {
+export const Entity = ({ entity, selected, energizing, onClick }: Props) => {
   let name: SpriteName = "energyNode";
   if (entity.kind === EntityKind.Ship) {
-    name = selected ? "shipEmpowered" : "ship";
+    name = energizing ? "shipEmpowered" : "ship";
   }
 
   const [position, setPosition] = useState([entity.x, entity.y] as Vector);
@@ -52,10 +53,11 @@ export const Entity = ({ entity, selected, onClick }: Props) => {
       variantIdx={entity.eid}
       x={x}
       y={y}
-      zIndex={entity.kind === EntityKind.Ship ? entity.eid : -1 * entity.eid}
       buttonMode
       interactive={onClick !== undefined}
       pointerdown={onClick}
+      zIndex={entity.eid}
+      selected={selected}
     />
   );
 };

@@ -51,11 +51,11 @@ export const SolarSystem = (props: Props) => {
         tileScale={[1, 1]}
       />
       <Container
-        sortableChildren
         x={SOLAR_SYSTEM_MARGIN_PX}
         y={SOLAR_SYSTEM_MARGIN_PX}
         width={SOLAR_SYSTEM_SIZE_PX}
         height={SOLAR_SYSTEM_SIZE_PX}
+        sortableChildren
       >
         <DebugOnly>
           <DebugGrid

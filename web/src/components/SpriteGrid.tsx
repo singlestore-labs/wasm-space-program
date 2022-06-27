@@ -1,25 +1,32 @@
 import { AssetSprite, SpriteName, Sprites } from "@/components/AssetSprite";
 import { cellToWorld } from "@/data/coordinates";
 
-export const SpriteGrid = () => {
+type Props = { selected?: boolean };
+
+export const SpriteGrid = ({ selected }: Props) => {
   const spriteGrid = [];
-  let cellX = 0;
+  const gridWidth = 5;
+  let offset = 0;
+
   for (const [name, variants] of Object.entries(Sprites)) {
     for (let i = 0; i < variants.length; i++) {
-      for (const size of ["1x", "2x"] as const) {
-        const [x, y] = cellToWorld(cellX, size === "1x" ? 0 : 1);
+      const [x, y] = cellToWorld(
+        offset % gridWidth,
+        Math.floor(offset / gridWidth)
+      );
+      offset += 1;
 
-        spriteGrid.push(
-          <AssetSprite
-            key={`${name}_${i}_${size}`}
-            name={name as SpriteName}
-            variantIdx={i}
-            x={x}
-            y={y}
-          />
-        );
-      }
-      cellX += 2;
+      spriteGrid.push(
+        <AssetSprite
+          key={`${name}_${i}`}
+          name={name as SpriteName}
+          variantIdx={i}
+          x={x * 2}
+          y={y * 2}
+          selected={selected}
+          zIndex={0}
+        />
+      );
     }
   }
   return <>{spriteGrid}</>;

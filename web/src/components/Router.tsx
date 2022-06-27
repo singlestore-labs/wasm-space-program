@@ -1,12 +1,11 @@
 import { DebugPlayground } from "@/components/DebugPlayground";
 import { Minimap } from "@/components/Minimap";
-import { PixiLoader } from "@/components/PixiLoader";
 import { SolarSystem } from "@/components/SolarSystem";
 import { UniverseMap } from "@/components/UniverseMap";
 import { WarpTransition } from "@/components/WarpTransition";
 import {
   debugPlaygroundAtom,
-  selectedEntityIdAtom,
+  selectedObjectAtom,
   sidAtom,
   viewportAtom,
 } from "@/data/atoms";
@@ -27,7 +26,7 @@ export const Router = () => {
 
   const [sid, setSid] = useAtom(sidAtom);
   const setViewport = useSetAtom(viewportAtom);
-  const setSelectedEntity = useSetAtom(selectedEntityIdAtom);
+  const setSelectedObject = useSetAtom(selectedObjectAtom);
   const debugPlayground = useAtomValue(debugPlaygroundAtom);
 
   const [showUniverseMap, setShowUniverseMap] = useState(false);
@@ -43,10 +42,25 @@ export const Router = () => {
         y: SOLAR_SYSTEM_SIZE_PX / 2,
         scale: 1,
       });
-      setSelectedEntity(null);
+      setSelectedObject(null);
     },
-    [setSelectedEntity, setSid, setViewport]
+    [setSelectedObject, setSid, setViewport]
   );
+
+  const openUniverseMap = useCallback(() => {
+    if (sid !== null) {
+      setSelectedObject({
+        kind: "SolarSystem",
+        id: sid,
+      });
+    }
+    setShowUniverseMap(true);
+  }, [setSelectedObject, sid]);
+
+  const closeUniverseMap = useCallback(() => {
+    setSelectedObject(null);
+    setShowUniverseMap(true);
+  }, [setSelectedObject]);
 
   if (debugPlayground) {
     return <DebugPlayground width={width} height={height} />;
@@ -55,7 +69,7 @@ export const Router = () => {
   if (transitioning) {
     return (
       <WarpTransition
-        durationMS={3000}
+        durationMS={2000}
         onComplete={() => setTransitioning(false)}
         width={width}
         height={height}
@@ -67,7 +81,7 @@ export const Router = () => {
         width={width}
         height={height}
         onWarp={transitionToSolarSystem}
-        onClose={() => setShowUniverseMap(false)}
+        onClose={closeUniverseMap}
       />
     );
   } else if (sid !== null) {
@@ -79,7 +93,7 @@ export const Router = () => {
           y={height - MINIMAP_HEIGHT - MINIMAP_MARGIN}
           width={MINIMAP_WIDTH}
           height={MINIMAP_HEIGHT}
-          onOpenMap={() => setShowUniverseMap(true)}
+          onOpenMap={openUniverseMap}
         />
       </>
     );
@@ -91,7 +105,7 @@ export const Router = () => {
         text="enter the universe"
         style={new TextStyle({ fontSize: 50, fill: colors.primary })}
         interactive
-        pointerdown={() => setShowUniverseMap(true)}
+        pointerdown={openUniverseMap}
       />
     );
   }

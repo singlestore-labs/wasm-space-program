@@ -6,7 +6,7 @@ type Props = {
 
 export const StatList = ({ stats, ...rest }: Props) => {
   return (
-    <Stack fontSize="sm" spacing={0} {...rest}>
+    <Stack fontSize="md" spacing={0} {...rest}>
       {stats.map((item, idx) => (
         <Flex key={idx}>
           <Box flex="1" pr={8}>

@@ -42,7 +42,6 @@ export const PixiLoader = () => {
         anchor={0.5}
         scale={2 + rotation * 0.3}
         rotation={rotation * Math.PI * 32}
-        // alpha={0.4 + rotation}
       />
       <Text
         anchor={0.5}

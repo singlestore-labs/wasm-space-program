@@ -33,6 +33,41 @@ export type SolarSystemRow = {
 export const querySolarSystems = (config: ClientConfig) =>
   Query<SolarSystemRow>(config, `SELECT sid, x, y FROM solar_system`);
 
+export type SolarSystemInfoRow = {
+  sid: number;
+  x: number;
+  y: number;
+  numShips: number;
+  numEnergyNodes: number;
+  totalEnergy: number;
+};
+
+export const querySolarSystem = (config: ClientConfig, sid: number) =>
+  QueryOne<SolarSystemInfoRow>(
+    config,
+    `
+      SELECT
+        sid, x, y,
+        ifnull((
+          select count(*) from entity
+          where entity.sid = solar_system.sid
+          and entity.kind = 1
+        ), 0) as numShips,
+        ifnull((
+          select count(*) from entity
+          where entity.sid = solar_system.sid
+          and entity.kind = 2
+        ), 0) as numEnergyNodes,
+        ifnull((
+          select sum(energy) from entity
+          where entity.sid = solar_system.sid
+        ), 0) as totalEnergy
+      FROM solar_system
+      WHERE sid = ?
+    `,
+    sid
+  );
+
 export const queryEntities = (config: ClientConfig, sid: number) =>
   Query<EntityRow>(
     config,
@@ -90,7 +125,7 @@ export const queryAvgTurnTime = (config: ClientConfig) =>
 export const queryNumSystems = (config: ClientConfig) =>
   QueryOne<{ c: number }>(
     config,
-    "select count(distinct sid) as c from entity"
+    "select count(*) as c from solar_system"
   ).then((r) => r.c);
 
 export const queryAvgShipsPerSystem = (config: ClientConfig) =>

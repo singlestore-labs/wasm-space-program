@@ -1,11 +1,11 @@
 {
 	"meta": {
 		"image": "spritesheet.png",
-		"size": {"w":483,"h":467},
+		"size": {"w":483,"h":409},
 		"scale": "1"
 	},
 	"frames": {
-		"Logo1A_logo.png":
+		"Logo1A_V1.png":
 		{
 			"frame": {"x":0,"y":0,"w":173,"h":174},
 			"rotated": false,
@@ -188,70 +188,6 @@
 			"trimmed": true,
 			"spriteSourceSize": {"x":0,"y":0,"w":76,"h":75},
 			"sourceSize": {"w":80,"h":75}
-		},
-		"Logo1A_001@2x.png":
-		{
-			"frame": {"x":413,"y":320,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_002@2x.png":
-		{
-			"frame": {"x":156,"y":334,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_003@2x.png":
-		{
-			"frame": {"x":214,"y":334,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_004@2x.png":
-		{
-			"frame": {"x":272,"y":334,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_005@2x.png":
-		{
-			"frame": {"x":330,"y":334,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_006@2x.png":
-		{
-			"frame": {"x":0,"y":409,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_007@2x.png":
-		{
-			"frame": {"x":58,"y":409,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
-		},
-		"Logo1A_008@2x.png":
-		{
-			"frame": {"x":116,"y":409,"w":58,"h":58},
-			"rotated": false,
-			"trimmed": true,
-			"spriteSourceSize": {"x":4,"y":4,"w":58,"h":58},
-			"sourceSize": {"w":66,"h":66}
 		}
 	}
 }
