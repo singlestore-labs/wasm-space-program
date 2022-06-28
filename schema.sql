@@ -1,16 +1,16 @@
 create database if not exists game;
 use game;
 
-create rowstore reference table if not exists turn_id_sequence (
+create table if not exists turn_id_sequence (
   seqid int primary key,
   next_val int default 0
 );
 replace into turn_id_sequence (seqid) values (0);
 
 -- turns tracks stats about the last 100 turns
-create rowstore reference table if not exists turns (
+create table if not exists turns (
   slot BIGINT NOT NULL PRIMARY KEY,
-  tid BIGINT NOT NULL UNIQUE,
+  tid BIGINT NOT NULL,
   start_time DATETIME(6) DEFAULT NOW(6) SERIES TIMESTAMP,
   end_time DATETIME(6) DEFAULT NULL
 );

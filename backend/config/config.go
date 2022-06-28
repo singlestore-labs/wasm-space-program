@@ -11,10 +11,10 @@ import (
 )
 
 type Config struct {
-	API        APIConfig        `toml:"api" envPrefix:"API"`
-	Worker     WorkerConfig     `toml:"worker" envPrefix:"WORKER"`
-	Database   DatabaseConfig   `toml:"database" envPrefix:"DATABASE"`
-	WebDataAPI WebDataAPIConfig `toml:"web" envPrefix:"WEB"`
+	API        APIConfig        `toml:"api" envPrefix:"API_"`
+	Worker     WorkerConfig     `toml:"worker" envPrefix:"WORKER_"`
+	Database   DatabaseConfig   `toml:"database" envPrefix:"DATABASE_"`
+	WebDataAPI WebDataAPIConfig `toml:"web" envPrefix:"WEB_"`
 }
 
 type APIConfig struct {

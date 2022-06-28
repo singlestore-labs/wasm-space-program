@@ -1,0 +1,43 @@
+name: on push
+on: [push]
+jobs:
+  deploy-web:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Install & cache web dependencies
+        uses: bahmutov/npm-install@v1
+        with:
+          working-directory: web
+
+      - name: Check typescript
+        run: yarn run tsc
+        working-directory: web
+
+      - name: Build
+        run: yarn run vite build
+        working-directory: web
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        with:
+          branch: gh-pages
+          folder: web/dist
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: go build
+        working-directory: backend
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        run: fly deploy
+        working-directory: backend

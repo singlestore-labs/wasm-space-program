@@ -20,3 +20,7 @@ RUN rustup component add rustfmt rust-src clippy
 
 RUN cargo install cargo-wasi cargo-expand && \
     cargo install --git https://github.com/bytecodealliance/wit-bindgen wit-bindgen-cli
+
+RUN curl -L https://fly.io/install.sh | sh
+ENV FLYCTL_INSTALL="/home/vscode/.fly"
+ENV PATH="$FLYCTL_INSTALL/bin:$PATH"
