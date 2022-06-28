@@ -1,4 +1,9 @@
-macro_rules! agent {
+use crate::{command::Command, interface::Entity, plan::AgentMemory, system::System};
+
+pub type Strategy =
+    fn(mem: &mut AgentMemory, last: &Command, entity: &Entity, system: &System) -> Option<Command>;
+
+macro_rules! chain_strategies {
     ( name = $name:ident, $($strategies:expr),* $(,)? ) => {
         pub fn $name(
             mem: &mut AgentMemory,
@@ -16,6 +21,7 @@ macro_rules! agent {
         }
     };
 }
+pub(crate) use chain_strategies;
 
 macro_rules! agent_strategy {
     ( $name:ident($mem:ident, $last:ident, $entity:ident, $system:ident) => $body:expr ) => {
@@ -29,6 +35,4 @@ macro_rules! agent_strategy {
         }
     };
 }
-
-pub(crate) use agent;
 pub(crate) use agent_strategy;

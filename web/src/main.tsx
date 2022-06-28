@@ -74,21 +74,23 @@ render(
   <React.StrictMode>
     <ChakraProvider theme={chakraTheme}>
       <ErrorOverlay>
-        <Suspense fallback={<SimpleLoader />}>
-          <InfoOverlay>
-            <PixiRoot>
-              <React.StrictMode>
-                <ErrorBoundary>
-                  <Suspense fallback={<PixiLoader />}>
-                    <AssetLoader>
-                      <Router />
-                    </AssetLoader>
-                  </Suspense>
-                </ErrorBoundary>
-              </React.StrictMode>
-            </PixiRoot>
-          </InfoOverlay>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<SimpleLoader />}>
+            <InfoOverlay>
+              <PixiRoot>
+                <React.StrictMode>
+                  <ErrorBoundary>
+                    <Suspense fallback={<PixiLoader />}>
+                      <AssetLoader>
+                        <Router />
+                      </AssetLoader>
+                    </Suspense>
+                  </ErrorBoundary>
+                </React.StrictMode>
+              </PixiRoot>
+            </InfoOverlay>
+          </Suspense>
+        </ErrorBoundary>
       </ErrorOverlay>
     </ChakraProvider>
   </React.StrictMode>,

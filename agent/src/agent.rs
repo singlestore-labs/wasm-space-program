@@ -1,8 +1,8 @@
 use crate::command::{Command, Component};
 use crate::interface::Entity;
-use crate::plan::AgentMemory;
+use crate::plan::{AgentMemory, Plan};
 use crate::point::Point;
-use crate::strategy::{agent, agent_strategy};
+use crate::strategy::{agent_strategy, chain_strategies, Strategy};
 use crate::system::System;
 
 mod strategy {
@@ -77,11 +77,30 @@ mod strategy {
     }
 }
 
-agent!(
-    name = all_strategies,
+chain_strategies!(
+    name = strategy_default,
     strategy::upgrade_harvestors,
     strategy::upgrade_thrusters,
     strategy::upgrade_blasters,
     strategy::chase_energy,
     strategy::random_move,
 );
+
+chain_strategies!(name = strategy_random, strategy::random_move,);
+
+pub fn execute_strategy(
+    strategy: Strategy,
+    e: Entity,
+    last_plan_enc: u64,
+    encoded_system: Vec<u8>,
+) -> u64 {
+    let last_plan: Plan = last_plan_enc.try_into().unwrap();
+    let system = System::try_from(encoded_system).unwrap();
+    let mut mem = last_plan.memory;
+
+    let next_cmd = strategy(&mut mem, &last_plan.cmd, &e, &system).unwrap_or(Command::Hold);
+
+    Plan::new(next_cmd, mem)
+        .try_into()
+        .expect("failed to encode plan")
+}

@@ -1,9 +1,7 @@
 wit_bindgen_rust::export!("interface.wit");
 
-use crate::agent;
-use crate::command::Command;
+use crate::agent::{execute_strategy, strategy_default, strategy_random};
 use crate::plan::Plan;
-use crate::system::System;
 pub use interface::{Entity, EntitySummary};
 
 pub struct Interface;
@@ -12,17 +10,12 @@ impl interface::Interface for Interface {
         e.into()
     }
 
-    fn step(e: Entity, last_plan_enc: u64, encoded_system: Vec<u8>) -> u64 {
-        let last_plan: Plan = last_plan_enc.try_into().unwrap();
-        let system = System::try_from(encoded_system).unwrap();
-        let mut mem = last_plan.memory;
+    fn strategy_default(e: Entity, last_plan_enc: u64, encoded_system: Vec<u8>) -> u64 {
+        execute_strategy(strategy_default, e, last_plan_enc, encoded_system)
+    }
 
-        let next_cmd =
-            agent::all_strategies(&mut mem, &last_plan.cmd, &e, &system).unwrap_or(Command::Hold);
-
-        Plan::new(next_cmd, mem)
-            .try_into()
-            .expect("failed to encode plan")
+    fn strategy_random(e: Entity, last_plan_enc: u64, encoded_system: Vec<u8>) -> u64 {
+        execute_strategy(strategy_random, e, last_plan_enc, encoded_system)
     }
 
     fn decodeplan(p: u64) -> String {

@@ -2,9 +2,10 @@ create database if not exists game;
 use game;
 
 create rowstore reference table if not exists turn_id_sequence (
-  next_val int primary key
+  seqid int primary key,
+  next_val int default 0
 );
-insert into turn_id_sequence values (0);
+replace into turn_id_sequence (seqid) values (0);
 
 -- turns tracks stats about the last 100 turns
 create rowstore reference table if not exists turns (
@@ -21,12 +22,19 @@ create table if not exists solar_system (
   y INT UNSIGNED NOT NULL
 );
 
+create reference table if not exists entity_strategy (
+  udf text primary key
+);
+
 create rowstore table if not exists entity (
   sid BIGINT NOT NULL,
   eid BIGINT NOT NULL AUTO_INCREMENT,
 
   kind TINYINT UNSIGNED NOT NULL
     COMMENT "1 = ship, 2 = energy node",
+
+  strategy TEXT
+    COMMENT "specify the name of a udf which controls this entity; null means use the default agent",
 
   x INT UNSIGNED NOT NULL,
   y INT UNSIGNED NOT NULL,
@@ -47,52 +55,6 @@ create rowstore table if not exists entity (
 );
 
 source functions.sql;
-
-drop view if exists entity_next;
-create view entity_next as (
-  select
-    entity.sid, entity.eid,
-    step(
-      row(
-        entity.kind,
-        entity.x,
-        entity.y,
-        entity.energy,
-        entity.shield,
-        entity.blasters,
-        entity.thrusters,
-        entity.harvesters
-      ),
-      entity.last_plan,
-      group_concat(pack(row(
-        coalesce(neighbor.kind, 0),
-        coalesce(neighbor.blasters, 0),
-        coalesce(neighbor.x, 0),
-        coalesce(neighbor.y, 0)
-      )) separator '')
-    ) as plan
-  from entity
-  left join entity neighbor on (
-    entity.sid = neighbor.sid
-    and entity.eid != neighbor.eid
-    -- entities can only see a certain radius around them
-    -- tune this radius based on the cell density and performance requirements
-    and distance_2d(
-      entity.x, entity.y,
-      neighbor.x, neighbor.y
-    ) < 16
-  )
-  where entity.kind = 1 -- ship
-  group by entity.sid, entity.eid
-);
-
-drop view if exists debug_next;
-create view debug_next as (
-  select
-    entity.sid, entity.eid, entity.x, entity.y, 
-    decodeplan(plan)
-  from entity natural join entity_next
-);
 
 drop view if exists entity_damage;
 create view entity_damage as (
@@ -162,9 +124,78 @@ create view entity_harvest as (
 
 delimiter //
 
+create or replace procedure gen_entity_next()
+returns query(sid bigint, eid bigint, plan bigint unsigned)
+as declare
+  query_prefix text = "
+    select
+      entity.sid, entity.eid,
+      (case
+  ";
+  query_suffix text = "
+      ) as plan
+    from entity
+    left join entity neighbor on (
+      entity.sid = neighbor.sid
+      and entity.eid != neighbor.eid
+      and distance_2d(
+        entity.x, entity.y,
+        neighbor.x, neighbor.y
+      ) < 16
+    )
+    where entity.kind = 1 -- ship
+    group by entity.sid, entity.eid
+  ";
+  strategy_input text = "
+    row(
+      entity.kind,
+      entity.x,
+      entity.y,
+      entity.energy,
+      entity.shield,
+      entity.blasters,
+      entity.thrusters,
+      entity.harvesters
+    ),
+    entity.last_plan,
+    group_concat(pack(row(
+      coalesce(neighbor.kind, 0),
+      coalesce(neighbor.blasters, 0),
+      coalesce(neighbor.x, 0),
+      coalesce(neighbor.y, 0)
+    )) separator '')
+  ";
+  query_cases text = "";
+  get_strategies query(udf text) = select udf from entity_strategy;
+  strategies array(record(udf text)) = collect(get_strategies);
+begin
+  for strat in strategies loop
+    query_cases = concat(query_cases, "when entity.strategy = ", quote(strat.udf), " then ", strat.udf, "(", strategy_input, ")");
+  end loop;
+
+  -- default case
+  query_cases = concat(query_cases, "when entity.strategy is null then strategy_default(", strategy_input, ") end");
+
+  return to_query(concat(query_prefix, query_cases, query_suffix));
+end //
+
+create or replace procedure debug_next()
+returns query(sid bigint, eid bigint, x int, y int, plan text)
+as declare
+  entity_next query(sid bigint, eid bigint, plan bigint unsigned) = gen_entity_next();
+  q query(sid bigint, eid bigint, x int, y int, plan text) =
+    select
+      entity.sid, entity.eid, entity.x, entity.y, 
+      decodeplan(plan)
+    from entity natural join entity_next;
+begin
+  return q;
+end //
+
 create or replace procedure run_turn()
 as declare
   turn_id bigint;
+  entity_next query(sid bigint, eid bigint, plan bigint unsigned) = gen_entity_next();
 begin
   start transaction;
 
@@ -251,7 +282,8 @@ begin
   update turns set end_time = NOW(6) where tid = turn_id;
 
   commit;
-exception when others then rollback;
+exception when others then
+  rollback; raise;
 end //
 
 create or replace procedure spawn(min_ships int, min_energy_nodes int)
@@ -263,7 +295,7 @@ begin
   insert into entity (sid, kind, x, y)
   select
     sid, 1 as kind,
-    floor(rand(now() + sid) * 100) as x,
+    floor(rand(now() + sid + 0) * 100) as x,
     floor(rand(now() + sid + 1) * 100) as y
   from solar_system
   where
@@ -276,8 +308,8 @@ begin
   insert into entity (sid, kind, x, y)
   select
     sid, 2 as kind,
-    floor(rand(now() + sid) * 100) as x,
-    floor(rand(now() + sid + 1) * 100) as y
+    floor(rand(now() + sid + 2) * 100) as x,
+    floor(rand(now() + sid + 3) * 100) as y
   from solar_system
   where
     (
@@ -287,7 +319,8 @@ begin
     ) < min_energy_nodes;
 
   commit;
-exception when others then rollback;
+exception when others then
+  rollback; raise;
 end //
 
 delimiter ;
@@ -312,10 +345,11 @@ values
     (0,   null, 2,      10,  15);
 
 insert into entity set
-    sid = 0, eid = null,
+    sid = 350, eid = null,
     kind = 1,
-    x = 10,
-    y = 20,
+    strategy = "strategy_random",
+    x = 0,
+    y = 0,
     energy = 100,
     shield = 100,
     blasters = 1,

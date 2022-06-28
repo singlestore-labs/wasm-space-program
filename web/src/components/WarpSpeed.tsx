@@ -1,3 +1,6 @@
+// This animation is inspired by the star-warp example from Pixi.js
+// https://github.com/pixijs/examples/blob/main/examples/js/demos-advanced/star-warp.js
+
 import { Container, Sprite, useTick } from "@inlet/react-pixi";
 import starUrl from "assets/star.png";
 import { useReducer, useRef } from "react";
