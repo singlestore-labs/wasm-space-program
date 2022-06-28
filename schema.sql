@@ -251,9 +251,43 @@ begin
   update turns set end_time = NOW(6) where tid = turn_id;
 
   commit;
-
 exception when others then rollback;
+end //
 
+create or replace procedure spawn(min_ships int, min_energy_nodes int)
+as declare
+  turn_id bigint;
+begin
+  start transaction;
+
+  insert into entity (sid, kind, x, y)
+  select
+    sid, 1 as kind,
+    floor(rand(now() + sid) * 100) as x,
+    floor(rand(now() + sid + 1) * 100) as y
+  from solar_system
+  where
+    (
+      select count(*) from entity
+      where entity.sid = solar_system.sid
+        and entity.kind = 1
+    ) < min_ships;
+
+  insert into entity (sid, kind, x, y)
+  select
+    sid, 2 as kind,
+    floor(rand(now() + sid) * 100) as x,
+    floor(rand(now() + sid + 1) * 100) as y
+  from solar_system
+  where
+    (
+      select count(*) from entity
+      where entity.sid = solar_system.sid
+        and entity.kind = 2
+    ) < min_energy_nodes;
+
+  commit;
+exception when others then rollback;
 end //
 
 delimiter ;

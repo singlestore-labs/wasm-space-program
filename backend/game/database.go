@@ -53,3 +53,13 @@ func NewDatabase(config config.DatabaseConfig) (*Database, error) {
 
 	return &Database{DB: sqlx.NewDb(db, "mysql")}, nil
 }
+
+func (d *Database) RunTurn() error {
+	_, err := d.Exec(`call run_turn()`)
+	return err
+}
+
+func (d *Database) Spawn(minShips int, minEnergyNodes int) error {
+	_, err := d.Exec(`call spawn(?, ?)`, minShips, minEnergyNodes)
+	return err
+}

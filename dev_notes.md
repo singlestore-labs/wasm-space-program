@@ -1,12 +1,8 @@
 # todo:
-* info panel
 * come up with a way to run custom queries against the demo
   * and quickly visualize the result
 * need to support multiple AIs
   * and ability to inject entitys with specific AIs at runtime
-* add turn running to the backend go service
-* build a "energy refill" system that continuously spawns energy throughout the universe when solar systems are low
-* build a ship spawn system that spawns ships whenever there are less than X ships
 
 # future iteration is to add warp entities to adjacent solar systems
 

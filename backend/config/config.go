@@ -12,12 +12,18 @@ import (
 
 type Config struct {
 	API        APIConfig        `toml:"api" envPrefix:"API"`
+	Worker     WorkerConfig     `toml:"worker" envPrefix:"WORKER"`
 	Database   DatabaseConfig   `toml:"database" envPrefix:"DATABASE"`
 	WebDataAPI WebDataAPIConfig `toml:"web" envPrefix:"WEB"`
 }
 
 type APIConfig struct {
 	Port int `env:"PORT"`
+}
+
+type WorkerConfig struct {
+	MinShips       int `env:"MIN_SHIPS"`
+	MinEnergyNodes int `env:"MIN_ENERGY_NODES"`
 }
 
 type DatabaseConfig struct {

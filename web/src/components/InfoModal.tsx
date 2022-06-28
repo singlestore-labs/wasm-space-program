@@ -29,19 +29,22 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
   const tabStyle: TabProps = {
     px: 3,
     py: 2,
-    borderBottom: "2px solid #4f34c7",
     fontWeight: 600,
+    borderBottom: "2px solid transparent",
   };
   const tabSelected: TabProps = {
-    borderBottom: "2px solid #c0b7eb",
-    backgroundColor: "#4f34c7",
+    borderBottom: "2px solid #fff",
+  };
+  const tabHover: TabProps = {
+    ...tabSelected,
+    backgroundColor: "rgba(255,255,255,0.1)",
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="4xl">
-      <ModalOverlay backgroundColor="rgba(79, 52, 199, 0.75)" />
+      <ModalOverlay backgroundColor="rgba(24, 6, 103, 0.5)" />
       <ModalContent borderRadius={0} border="2px solid #000">
-        <ModalBody backgroundColor="#1e0a78" p={0}>
+        <ModalBody backgroundColor="#4f34c7" p={0}>
           <ModalCloseButton variant={"ghost"} top={4} right={4} />
 
           <Tabs variant="unstyled" size="sm">
@@ -53,7 +56,7 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
                 <Tab
                   {...tabStyle}
                   _active={tabSelected}
-                  _hover={tabSelected}
+                  _hover={tabHover}
                   _selected={tabSelected}
                 >
                   Game info
@@ -61,7 +64,7 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
                 <Tab
                   {...tabStyle}
                   _active={tabSelected}
-                  _hover={tabSelected}
+                  _hover={tabHover}
                   _selected={tabSelected}
                 >
                   Architecture
@@ -70,7 +73,7 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
             </Box>
 
             <TabPanels
-              backgroundColor="#311b92"
+              backgroundColor="#311B92"
               maxHeight="75vh"
               overflowX="auto"
             >

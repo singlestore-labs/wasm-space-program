@@ -37,13 +37,8 @@ The key technologies used are:
    cd web
    yarn
    yarn dev
-   ```
-7. run the game (you will have to modify this script to point at your SingleStore cluster - this will be fixed soon)
-   ```bash
-   ./run_turns.sh
-   ```
-8. open your browser to http://localhost:3000#sid=0
-9. create some entities with sid=0 (sid is the id of the solar system) (see schema.sql for examples)
+7. open your browser to http://localhost:3000#sid=0
+8. create some entities with sid=0 (sid is the id of the solar system) (see schema.sql for examples)
 
 Notice that the url contains useful things like the sid to look at. This will get fancier once I build the universe map, but till then you can look at solar systems by changing `sid=X` in the url.
 

@@ -1,8 +1,12 @@
 [api]
 port = 3001
 
+[worker]
+minShips = 32
+minEnergyNodes = 128
+
 [database]
-host = "127.0.0.1"
+host = "172.17.0.4"
 port = 3306
 username = "root"
 password = "test"

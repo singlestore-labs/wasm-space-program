@@ -24,6 +24,8 @@ func NewServer(cfg config.APIConfig, dataapi config.WebDataAPIConfig) *Server {
 
 func (s *Server) ListenAndServe() error {
 	r := gin.Default()
+	r.SetTrustedProxies(nil)
+	r.TrustedPlatform = "Fly-Client-IP"
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
