@@ -124,6 +124,9 @@ export const queryEntity = (config: ClientConfig, eid: number) =>
     eid
   );
 
+export const queryEntityMaybe = (config: ClientConfig, eid: number) =>
+  queryEntity(config, eid).catch(() => null);
+
 export const queryNumEntitiesByKind = (config: ClientConfig) =>
   Query<{ kind: number; count: number }>(
     config,

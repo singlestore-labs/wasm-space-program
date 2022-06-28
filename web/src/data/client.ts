@@ -19,6 +19,13 @@ export type SQLValue =
   | SQLValue[];
 
 export type Row = { [key: string]: SQLValue };
+export type Tuple = SQLValue[];
+
+export type ColumnDescription = {
+  name: string;
+  dataType: string;
+  nullable: boolean;
+};
 
 const regexSQLErrorCode = /^Error (?<code>\d+):/;
 
@@ -89,7 +96,7 @@ export const QueryNoDb = <T = Row>(
   ...args: SQLValue[]
 ): Promise<T[]> => Query({ ...config, database: undefined }, sql, ...args);
 
-export const QueryTuples = async <T extends [...SQLValue[]] = SQLValue[]>(
+export const QueryTuples = async <T extends [...Tuple] = Tuple>(
   config: ClientConfigOptionalDatabase,
   sql: string,
   ...args: SQLValue[]
@@ -101,6 +108,20 @@ export const QueryTuples = async <T extends [...SQLValue[]] = SQLValue[]>(
   }
 
   return data.results[0].rows;
+};
+
+export const QueryTuplesWithColumns = async <T extends [...Tuple] = Tuple>(
+  config: ClientConfigOptionalDatabase,
+  sql: string,
+  ...args: SQLValue[]
+): Promise<[ColumnDescription[], T[]]> => {
+  const data = await fetchEndpoint("query/tuples", config, sql, ...args);
+
+  if (data.results.length !== 1) {
+    throw new SQLError("Expected exactly one result set", sql);
+  }
+
+  return [data.results[0].columns, data.results[0].rows];
 };
 
 export const ExecNoDb = (

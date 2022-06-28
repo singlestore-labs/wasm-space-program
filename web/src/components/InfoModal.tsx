@@ -3,22 +3,64 @@ import {
   ImageFloatRightTag,
   MarkdownText,
 } from "@/components/MarkdownText";
+import { SOLAR_SYSTEM_MARGIN_PX } from "@/components/SolarSystem";
+import {
+  clientConfigAtom,
+  selectedObjectAtom,
+  sidAtom,
+  viewportAtom,
+} from "@/data/atoms";
+import {
+  ColumnDescription,
+  QueryTuplesWithColumns,
+  Tuple,
+} from "@/data/client";
+import { cellToWorld } from "@/data/coordinates";
+import {
+  EntityKind,
+  EntityKindsByValue,
+  EntityKindStrings,
+  queryEntityMaybe,
+} from "@/data/queries";
 import architectureURL from "@assets/architecture_diagram.png";
 import turnResolutionURL from "@assets/turn_resolution_simple.png";
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormHelperText,
+  Heading,
+  Input,
+  InputGroup,
+  InputLeftAddon,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
   Tab,
+  Table,
+  TableContainer,
   TabList,
   TabPanel,
   TabPanels,
   TabProps,
   Tabs,
+  Tbody,
+  Td,
+  Textarea,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useCallback, useState } from "react";
+import useSWR from "swr";
 
 type Props = {
   isOpen: boolean;
@@ -40,6 +82,16 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
     backgroundColor: "rgba(255,255,255,0.1)",
   };
 
+  const CustomTab = (props: TabProps) => (
+    <Tab
+      {...tabStyle}
+      _active={tabSelected}
+      _hover={tabHover}
+      _selected={tabSelected}
+      {...props}
+    />
+  );
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="4xl">
       <ModalOverlay backgroundColor="rgba(24, 6, 103, 0.5)" />
@@ -53,22 +105,10 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
                 Information
               </Box>
               <TabList gap={4} mt={2}>
-                <Tab
-                  {...tabStyle}
-                  _active={tabSelected}
-                  _hover={tabHover}
-                  _selected={tabSelected}
-                >
-                  Game info
-                </Tab>
-                <Tab
-                  {...tabStyle}
-                  _active={tabSelected}
-                  _hover={tabHover}
-                  _selected={tabSelected}
-                >
-                  Architecture
-                </Tab>
+                <CustomTab>Game info</CustomTab>
+                <CustomTab>Architecture</CustomTab>
+                <CustomTab>Find entity</CustomTab>
+                <CustomTab>Run query</CustomTab>
               </TabList>
             </Box>
 
@@ -82,6 +122,12 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
               </TabPanel>
               <TabPanel px={6} py={4}>
                 <Architecture />
+              </TabPanel>
+              <TabPanel px={6} py={4}>
+                <FindEntity onClose={onClose} />
+              </TabPanel>
+              <TabPanel px={6} py={4}>
+                <RunQuery />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -140,8 +186,8 @@ const Architecture = () => {
         This game runs entirely within [SingleStore][s2] and the browser.
         SingleStore, a scale out relational database optimized for transactions
         and analytics, stores the game state and handles turn resolution. The
-        game client is runs in the browser and communicates directly with
-        SingleStore over our HTTP based [Data API][data-api].
+        game client runs in the browser and communicates directly with
+        SingleStore over our [Data API][data-api].
 
         ![${ImageCenterTag}](${architectureURL})
 
@@ -149,5 +195,182 @@ const Architecture = () => {
         [data-api]: https://docs.singlestore.com/managed-service/en/reference/data-api.html
       `}
     </MarkdownText>
+  );
+};
+
+const FindEntity = ({ onClose }: { onClose: () => void }) => {
+  const clientConfig = useAtomValue(clientConfigAtom);
+
+  const setSelectedEntity = useSetAtom(selectedObjectAtom);
+  const setSid = useSetAtom(sidAtom);
+  const setViewport = useSetAtom(viewportAtom);
+
+  const [eid, setEid] = useState(0);
+
+  const { data: targetEntity } = useSWR(
+    ["queryEntityMaybe", eid, clientConfig],
+    () => queryEntityMaybe(clientConfig, eid)
+  );
+
+  const warp = useCallback(() => {
+    if (!targetEntity) {
+      return;
+    }
+
+    setSid(targetEntity.sid);
+    setSelectedEntity({
+      kind: EntityKindsByValue[targetEntity.kind] as EntityKind,
+      id: targetEntity.eid,
+    });
+
+    const [worldX, worldY] = cellToWorld(targetEntity.x, targetEntity.y);
+    setViewport({
+      x: worldX + SOLAR_SYSTEM_MARGIN_PX,
+      y: worldY + SOLAR_SYSTEM_MARGIN_PX,
+      scale: 1,
+    });
+
+    onClose();
+  }, [onClose, setSelectedEntity, setSid, setViewport, targetEntity]);
+
+  return (
+    <>
+      <Heading size="lg" my={4}>
+        Find entity
+      </Heading>
+      <FormControl isInvalid={!targetEntity}>
+        <InputGroup>
+          <InputLeftAddon>Entity ID:</InputLeftAddon>
+          <Input
+            value={eid}
+            onChange={(e) => setEid(parseInt(e.target.value, 10))}
+            type="number"
+          />
+        </InputGroup>
+        <FormErrorMessage>Entity not found</FormErrorMessage>
+        {targetEntity && (
+          <FormHelperText>
+            Target entity: {EntityKindStrings[targetEntity.kind]} in solar
+            system {targetEntity.sid} at location {targetEntity.x},{" "}
+            {targetEntity.y}
+          </FormHelperText>
+        )}
+      </FormControl>
+      <Button
+        mt={4}
+        width="100%"
+        disabled={!targetEntity}
+        onClick={warp}
+        colorScheme="purple"
+      >
+        Warp!
+      </Button>
+    </>
+  );
+};
+
+const DEFAULT_QUERY = `
+select sid, count(*) num_entities
+from entity
+group by sid
+order by num_entities desc
+limit 10
+`.trim();
+
+const RunQuery = () => {
+  const clientConfig = useAtomValue(clientConfigAtom);
+  const [query, setQuery] = useState(DEFAULT_QUERY);
+  const [results, setResults] = useState<[ColumnDescription[], Tuple[]] | null>(
+    null
+  );
+  const [error, setError] = useState(null as string | null);
+
+  const runQuery = useCallback(async () => {
+    try {
+      const result = await QueryTuplesWithColumns(clientConfig, query);
+      setResults(result);
+      setError(null);
+    } catch (err) {
+      setResults(null);
+      setError(err instanceof Error ? err.message : `unknown error: ${err}`);
+    }
+  }, [clientConfig, query]);
+
+  return (
+    <>
+      <MarkdownText>
+        {`
+          ### Run query
+          Use the text box below to run any select query against SingleStore.
+          This feature takes advantage of the [Data API][data-api] to run the
+          query directly from your browser.
+
+          [data-api]: https://docs.singlestore.com/managed-service/en/reference/data-api.html
+        `}
+      </MarkdownText>
+      <Textarea
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        resize="vertical"
+        rows={query.split("\n").length}
+      />
+      <Button colorScheme="purple" mt={4} onClick={runQuery}>
+        Run query
+      </Button>
+      {error ? (
+        <Alert status="error" mt={4}>
+          <AlertIcon />
+          <AlertTitle>Query failed</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : (
+        <QueryResults results={results} />
+      )}
+    </>
+  );
+};
+
+const QueryResults = ({
+  results,
+}: {
+  results?: [ColumnDescription[], Tuple[]] | null;
+}) => {
+  if (!results || results[1].length === 0) {
+    return (
+      <Alert status="info" mt={4}>
+        <AlertIcon />
+        <AlertTitle>No results</AlertTitle>
+        <AlertDescription>
+          No results were returned from the query.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  const [columnDescs, tuples] = results;
+  const columns = columnDescs.map((c) => <Th key={c.name}>{c.name}</Th>);
+
+  const rows = tuples.map((row, idx) => (
+    <Tr key={idx}>
+      {row.map((v) => (
+        <Td key={v?.toString()}>{v}</Td>
+      ))}
+    </Tr>
+  ));
+
+  return (
+    <TableContainer
+      borderWidth={1}
+      borderColor="purple.400"
+      mt={4}
+      borderRadius={4}
+    >
+      <Table variant="primary" size="sm">
+        <Thead>
+          <Tr>{columns}</Tr>
+        </Thead>
+        <Tbody>{rows}</Tbody>
+      </Table>
+    </TableContainer>
   );
 };

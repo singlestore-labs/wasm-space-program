@@ -25,7 +25,7 @@ const MINIMAP_WIDTH = 200;
 const MINIMAP_HEIGHT = 200;
 const MINIMAP_MARGIN = 16;
 
-const SOLAR_SYSTEM_MARGIN_PX = 800;
+export const SOLAR_SYSTEM_MARGIN_PX = 800;
 const WORLD_SIZE_PX = SOLAR_SYSTEM_SIZE_PX + SOLAR_SYSTEM_MARGIN_PX * 2;
 
 export const SolarSystem = (props: Props) => {

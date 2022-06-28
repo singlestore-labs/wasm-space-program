@@ -64,6 +64,20 @@ export const colorToNumber = memoize((c: string): number =>
   Number(c.replace("#", "0x"))
 );
 
+import { tableAnatomy } from "@chakra-ui/anatomy";
+import type { PartsStyleObject } from "@chakra-ui/theme-tools";
+
+const tableStyle: PartsStyleObject<typeof tableAnatomy> = {
+  th: {
+    borderBottom: "1px",
+    borderColor: "purple.400"
+  },
+  td: {
+    borderBottom: "1px",
+    borderColor: "purple.400"
+  },
+};
+
 export const chakraTheme = extendTheme({
   config: {
     useSystemColorMode: false,
@@ -84,6 +98,11 @@ export const chakraTheme = extendTheme({
     Link: {
       baseStyle: {
         color: "magenta.200",
+      },
+    },
+    Table: {
+      variants: {
+        primary: tableStyle,
       },
     },
   },
