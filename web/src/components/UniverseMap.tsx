@@ -9,11 +9,13 @@ import {
   sidAtom,
   viewportAtom,
 } from "@/data/atoms";
-import { cellToWorld, UNIVERSE_SIZE_PX } from "@/data/coordinates";
-import { querySolarSystems } from "@/data/queries";
+import { cellToWorld, UNIVERSE_SIZE_PX, worldToCell } from "@/data/coordinates";
+import { querySolarSystemsInBounds } from "@/data/queries";
+import { swrLaggy } from "@/data/swr";
 import { TilingSprite } from "@inlet/react-pixi";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useContext } from "react";
+import { Rectangle } from "pixi.js";
+import { useCallback, useContext, useState } from "react";
 import { useEffectOnceWhen } from "rooks";
 import useSWR from "swr";
 
@@ -31,8 +33,22 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
   const setViewport = useSetAtom(viewportAtom);
   const sid = useAtomValue(sidAtom);
 
-  const { data: systems } = useSWR(["querySolarSystems", clientConfig], () =>
-    querySolarSystems(clientConfig)
+  const [viewportBounds, setViewportBounds] = useState(
+    new Rectangle(0, 0, 0, 0)
+  );
+
+  const onBoundsChanged = useCallback((bounds: Rectangle) => {
+    const [x, y] = worldToCell(bounds.x, bounds.y);
+    const [width, height] = worldToCell(bounds.width, bounds.height);
+    setViewportBounds(new Rectangle(x, y, width, height));
+  }, []);
+
+  const { data: systems } = useSWR(
+    ["querySolarSystemsInBounds", clientConfig, viewportBounds],
+    () => querySolarSystemsInBounds(clientConfig, viewportBounds),
+    {
+      use: [swrLaggy],
+    }
   );
 
   useEffectOnceWhen(() => {
@@ -69,7 +85,7 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
             y={worldY}
             interactive
             buttonMode
-            pointerdown={() => onWarp(sid)}
+            pointertap={() => onWarp(sid)}
             pointerover={() => selectSolarSystem(sid)}
             pointerout={() => setSelectedObject(null)}
             selected={selectedObject?.id === sid}
@@ -84,7 +100,12 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
       screenHeight={height}
       worldWidth={UNIVERSE_SIZE_PX}
       worldHeight={UNIVERSE_SIZE_PX}
+      onBoundsChanged={onBoundsChanged}
       clamp
+      clampScale={{
+        minScale: 1,
+        maxScale: 5,
+      }}
     >
       <TilingSprite
         texture={starsTile}

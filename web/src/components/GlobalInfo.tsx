@@ -136,16 +136,20 @@ const StatTable = () => {
       value: formatNumber(stats.numSystems),
     },
     {
-      label: "Average ships per system",
-      value: formatNumber(stats.avgShipsPerSystem),
-    },
-    {
       label: "# ships",
       value: formatNumber(stats.numEntities.Ship),
     },
     {
+      label: "Average ships per system",
+      value: formatNumber(stats.avgEntitiesPerSystem.Ship),
+    },
+    {
       label: "# energy nodes",
       value: formatNumber(stats.numEntities.EnergyNode),
+    },
+    {
+      label: "Average ships per system",
+      value: formatNumber(stats.avgEntitiesPerSystem.EnergyNode),
     },
   ];
 

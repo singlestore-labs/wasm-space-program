@@ -1,5 +1,6 @@
 import { ClientConfig, Query, QueryOne } from "@/data/client";
 import { invert } from "lodash-es";
+import { Rectangle } from "pixi.js";
 
 export const EntityKind = {
   Ship: 1 as const,
@@ -37,6 +38,24 @@ export type SolarSystemRow = {
 
 export const querySolarSystems = (config: ClientConfig) =>
   Query<SolarSystemRow>(config, `SELECT sid, x, y FROM solar_system`);
+
+export const querySolarSystemsInBounds = (
+  config: ClientConfig,
+  bounds: Rectangle
+) =>
+  Query<SolarSystemRow>(
+    config,
+    `
+    SELECT sid, x, y FROM solar_system
+    WHERE
+      x BETWEEN ? AND ?
+      AND y BETWEEN ? AND ?
+  `,
+    bounds.x,
+    bounds.x + bounds.width,
+    bounds.y,
+    bounds.y + bounds.height
+  );
 
 export type SolarSystemInfoRow = {
   sid: number;
@@ -156,33 +175,40 @@ export const queryNumSystems = (config: ClientConfig) =>
     "select count(*) as c from solar_system"
   ).then((r) => r.c);
 
-export const queryAvgShipsPerSystem = (config: ClientConfig) =>
-  QueryOne<{ a: number }>(
+export const queryAvgEntitiesPerSystem = (config: ClientConfig) =>
+  Query<{ kind: number; count: number }>(
     config,
     `
-      select ifnull(avg(c), 0) :> int as a
+      select kind, ifnull(avg(c), 0) :> int as count
       from (
-        select count(*) as c
+        select kind, count(*) as c
         from entity
-        where kind = ?
-        group by sid
+        group by sid, kind
       )
-    `,
-    EntityKind.Ship
-  ).then((r) => r.a);
+      group by kind
+    `
+  ).then((rows) =>
+    rows.reduce(
+      (acc, row) => {
+        acc[EntityKindsByValue[row.kind] as EntityKind] = row.count;
+        return acc;
+      },
+      { Ship: 0, EnergyNode: 0 }
+    )
+  );
 
 export const queryGlobalStats = async (config: ClientConfig) => {
-  const [numEntities, avgTurnTime, avgShipsPerSystem, numSystems] =
+  const [numEntities, avgTurnTime, avgEntitiesPerSystem, numSystems] =
     await Promise.all([
       queryNumEntitiesByKind(config),
       queryAvgTurnTime(config),
-      queryAvgShipsPerSystem(config),
+      queryAvgEntitiesPerSystem(config),
       queryNumSystems(config),
     ]);
   return {
     numEntities,
     avgTurnTime,
-    avgShipsPerSystem,
+    avgEntitiesPerSystem,
     numSystems,
   };
 };

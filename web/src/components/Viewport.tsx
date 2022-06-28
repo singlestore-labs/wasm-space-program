@@ -10,6 +10,7 @@ type ViewportProps = {
   worldWidth: number;
   worldHeight: number;
   clamp?: boolean;
+  clampScale?: { minScale: number; maxScale: number };
 
   onBoundsChanged?: (bounds: PIXI.Rectangle) => void;
   onScaleChanged?: (scale: number) => void;
@@ -29,8 +30,15 @@ type PixiComponentViewportProps = ViewportProps & {
 
 const PixiComponentViewport = PixiComponent("Viewport", {
   create: (props: PixiComponentViewportProps) => {
-    const { screenWidth, screenHeight, worldWidth, worldHeight, clamp, app } =
-      props;
+    const {
+      screenWidth,
+      screenHeight,
+      worldWidth,
+      worldHeight,
+      clamp,
+      clampScale,
+      app,
+    } = props;
 
     const viewport = new PixiViewport({
       screenWidth,
@@ -41,10 +49,14 @@ const PixiComponentViewport = PixiComponent("Viewport", {
       interaction: app.renderer.plugins.interaction,
     });
 
-    viewport.drag().pinch().wheel().clampZoom({
-      minScale: 0.3,
-      maxScale: 5,
-    });
+    viewport
+      .drag()
+      .pinch()
+      .wheel()
+      .clampZoom({
+        minScale: clampScale?.minScale ?? 0.3,
+        maxScale: clampScale?.maxScale ?? 5,
+      });
 
     if (clamp) {
       viewport.clamp({
