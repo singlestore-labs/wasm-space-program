@@ -35,13 +35,15 @@ export const EntityTracker = ({ explosionIndex, cells }: Props) => {
         />
       );
     } else if (cell.kind === "battle") {
-      const entity0 = cell.entities[0];
+      const entity =
+        cell.entities.find((entity) => entity.kind === EntityKind.Ship) ||
+        cell.entities[0];
       nodes.push(
         <Battle
-          key={`battle-${entity0.eid}`}
-          cellX={entity0.x}
-          cellY={entity0.y}
-          onClick={() => selectEntity(entity0)}
+          key={`battle-${entity.x}-${entity.y}`}
+          cellX={entity.x}
+          cellY={entity.y}
+          onClick={() => selectEntity(entity)}
           selected={cell.selected}
         />
       );

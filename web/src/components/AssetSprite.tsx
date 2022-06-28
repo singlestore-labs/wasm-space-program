@@ -1,6 +1,6 @@
 import { AssetContext } from "@/components/AssetLoader";
 import { CELL_SIZE_PX } from "@/data/coordinates";
-import { Graphics, Sprite } from "@inlet/react-pixi";
+import { Container, Graphics, Sprite } from "@inlet/react-pixi";
 import { ComponentProps, useContext } from "react";
 
 export const Sprites = {
@@ -81,48 +81,52 @@ export const AssetSprite = ({
     height = CELL_SIZE_PX;
   }
 
-  const margin = 4;
-  const selectedBg = (
-    <Graphics
-      x={x - margin}
-      y={y - margin}
-      width={CELL_SIZE_PX + margin * 2}
-      height={CELL_SIZE_PX + margin * 2}
-      cacheAsBitmap
-      draw={(ctx) => {
-        const colors = nameToSelectedColors[name];
-        ctx.clear();
-        ctx.lineStyle({
-          width: 2,
-          color: colors.stroke,
-          alignment: 0,
-        });
-        ctx.beginFill(colors.fill, 1);
-        ctx.drawRect(
-          0,
-          0,
-          CELL_SIZE_PX + margin * 2,
-          CELL_SIZE_PX + margin * 2
-        );
-        ctx.endFill();
-      }}
+  const sprite = (
+    <Sprite
+      roundPixels
+      texture={texture}
+      width={width}
+      height={height}
+      anchor={[0.5, 0.5]}
+      x={x + CELL_SIZE_PX / 2}
+      y={y + CELL_SIZE_PX / 2}
+      {...rest}
     />
   );
 
+  if (!selected) {
+    return sprite;
+  }
+
+  const margin = 4;
   return (
-    <>
-      {selected && selectedBg}
-      <Sprite
-        roundPixels
-        texture={texture}
-        width={width}
-        height={height}
-        anchor={[0.5, 0.5]}
-        x={x + CELL_SIZE_PX / 2}
-        y={y + CELL_SIZE_PX / 2}
-        {...rest}
+    <Container>
+      <Graphics
+        x={x - margin}
+        y={y - margin}
+        width={CELL_SIZE_PX + margin * 2}
+        height={CELL_SIZE_PX + margin * 2}
+        cacheAsBitmap
+        draw={(ctx) => {
+          const colors = nameToSelectedColors[name];
+          ctx.clear();
+          ctx.lineStyle({
+            width: 2,
+            color: colors.stroke,
+            alignment: 0,
+          });
+          ctx.beginFill(colors.fill, 1);
+          ctx.drawRect(
+            0,
+            0,
+            CELL_SIZE_PX + margin * 2,
+            CELL_SIZE_PX + margin * 2
+          );
+          ctx.endFill();
+        }}
       />
-    </>
+      {sprite}
+    </Container>
   );
 };
 

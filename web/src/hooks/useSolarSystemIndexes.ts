@@ -107,9 +107,10 @@ export const useSolarSystemIndexes = (entities?: EntityRow[]) => {
       if (numShips === 1) {
         // 1 ship
         // 1 ship + 1 or more energy nodes
+        const entity = cell.find((e) => e.kind === EntityKind.Ship) || cell[0];
         newCellList.push({
           kind: "entity",
-          entity: cell[0],
+          entity: entity,
           energizing: numEnergyNodes > 0,
           selected,
         });

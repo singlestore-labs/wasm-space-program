@@ -75,7 +75,7 @@ export const WelcomeScreen = ({ onEnter, width, height }: Props) => {
               align: "center",
             })
           }
-          // isSprite
+          isSprite
         />
       </Container>
     </>

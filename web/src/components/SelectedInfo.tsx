@@ -64,7 +64,7 @@ export const SelectedInfo = () => {
   if (entities) {
     for (const entity of entities) {
       if (entity.eid === selectedObject?.id) {
-        if (selectedKind === "Ship") {
+        if (entity.kind === EntityKind.Ship) {
           nodes.push(
             <ShipInfo
               key={entity.eid}
@@ -72,7 +72,7 @@ export const SelectedInfo = () => {
               onClose={clearSelected}
             />
           );
-        } else if (selectedKind === "EnergyNode") {
+        } else if (entity.kind === EntityKind.EnergyNode) {
           nodes.push(
             <EnergyNodeInfo
               key={entity.eid}
@@ -240,7 +240,7 @@ const NeighborEntity = ({
   entity: EntityRow;
   onSelect: (o: SelectedObject) => void;
 }) => (
-  <Box
+  <Flex
     key={entity.eid}
     backgroundColor="#494552"
     border="2px solid #858191"
@@ -258,6 +258,14 @@ const NeighborEntity = ({
     px={2}
     py={1}
   >
-    {EntityKindStrings[entity.kind]}: 0x{entity.eid.toString(16).toUpperCase()}
-  </Box>
+    <Box flex={1}>
+      {EntityKindStrings[entity.kind]}: 0x
+      {entity.eid.toString(16).toUpperCase()}
+    </Box>
+    {entity.kind === EntityKind.Ship && (
+      <Box fontSize="sm" color="#00E676">
+        {formatNumber(entity.shield)}%
+      </Box>
+    )}
+  </Flex>
 );

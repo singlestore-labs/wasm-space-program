@@ -39,7 +39,6 @@ export const SolarSystem = (props: Props) => {
     () => queryEntities(clientConfig, sid),
     {
       refreshInterval: 1000,
-      dedupingInterval: 1000,
     }
   );
 

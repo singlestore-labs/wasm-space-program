@@ -1,8 +1,8 @@
 # todo:
-* come up with a way to run custom queries against the demo
-  * and quickly visualize the result
 * need to support multiple AIs
   * and ability to inject entitys with specific AIs at runtime
+* come up with a way to run custom queries against the demo
+  * and quickly visualize the result
 
 # future iteration is to add warp entities to adjacent solar systems
 

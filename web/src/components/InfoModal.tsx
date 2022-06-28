@@ -43,7 +43,7 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="4xl">
       <ModalOverlay backgroundColor="rgba(24, 6, 103, 0.5)" />
-      <ModalContent borderRadius={0} border="2px solid #000">
+      <ModalContent borderRadius={0} border="2px solid #000" mb={0}>
         <ModalBody backgroundColor="#4f34c7" p={0}>
           <ModalCloseButton variant={"ghost"} top={4} right={4} />
 
@@ -74,8 +74,8 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
 
             <TabPanels
               backgroundColor="#311B92"
-              maxHeight="75vh"
               overflowX="auto"
+              maxHeight="calc(75vh - 30px)"
             >
               <TabPanel px={6} py={4}>
                 <GameInfo />
