@@ -41,7 +41,7 @@ export const InfoModal = ({ isOpen, onClose }: Props) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="4xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="4xl">
       <ModalOverlay backgroundColor="rgba(24, 6, 103, 0.5)" />
       <ModalContent borderRadius={0} border="2px solid #000">
         <ModalBody backgroundColor="#4f34c7" p={0}>
