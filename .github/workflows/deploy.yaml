@@ -37,7 +37,13 @@ jobs:
         run: go build
         working-directory: backend
 
+      - name: Install fly
+        if: github.ref == 'refs/heads/main'
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
       - name: Deploy
         if: github.ref == 'refs/heads/main'
-        run: fly deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only
         working-directory: backend
