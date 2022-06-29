@@ -35,7 +35,7 @@ type DatabaseConfig struct {
 }
 
 type WebDataAPIConfig struct {
-	Endpoints []string `env:"HOSTS"`
+	Endpoints []string `env:"ENDPOINTS"`
 	Username  string   `env:"USERNAME"`
 	Password  string   `env:"PASSWORD"`
 	Database  string   `env:"DB" toml:"db"`
