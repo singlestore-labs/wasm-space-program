@@ -169,7 +169,7 @@ export const queryTurnInfo = (config: ClientConfig) =>
     config,
     `
       select
-        avg(timestampdiff(microsecond, start_time, end_time)) :> bigint as avgTurnTime,
+        avg(timestampdiff(microsecond, start_time, end_time)) / 1000 :> double as avgTurnTime,
         ifnull(avg(writes), 0) :> bigint as avgWrites
       from turns
       where end_time is not null
