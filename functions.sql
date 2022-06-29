@@ -22,6 +22,16 @@ create or replace function strategy_random as wasm
   with wit from local infile "agent/interface.wit";
 replace into entity_strategy values ("strategy_random");
 
+create or replace function strategy_flee as wasm
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
+  with wit from local infile "agent/interface.wit";
+replace into entity_strategy values ("strategy_flee");
+
+create or replace function strategy_battle as wasm
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
+  with wit from local infile "agent/interface.wit";
+replace into entity_strategy values ("strategy_battle");
+
 delimiter //
 
 create or replace function distance_2d (x1 int, y1 int, x2 int, y2 int)

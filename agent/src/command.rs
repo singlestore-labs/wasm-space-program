@@ -151,6 +151,15 @@ impl Direction {
             _ => unreachable!(),
         }
     }
+
+    pub fn opposite(&self) -> Self {
+        match *self { 
+            Direction::North =>Direction::South,
+            Direction::South =>Direction::North, 
+            Direction::East => Direction::West,
+            Direction::West => Direction::East
+        }
+    }
 }
 
 #[cfg(test)]
