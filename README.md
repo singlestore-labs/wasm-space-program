@@ -1,25 +1,61 @@
 # Wasm Space Program
 
-In this demo we simulate a fake universe full of thousands of solar systems. In each solar system there are many space ships and energy nodes. Each space ship is controlled by an AI written in Rust and deployed into SingleStore as a UDF using our new Code Engine (Wasm). The AI is able to observe a 16x16 region of cells around it in order to decide what to do. We execute one turn every second which involves running a series of update queries against SingleStore. These update queries implement asking every AI for their next action and then resolving all actions.
+In this demo we simulate a fake universe full of thousands of solar systems. In each solar system there are many space ships and energy nodes. Each space ship is controlled by an AI written in Rust and deployed into SingleStore as a user defined function (UDF) using our new [Code Engine (Powered by Wasm)][code-engine]. The AI is able to observe a 16x16 region of cells around it in order to decide what to do. We execute one turn every second which involves running a series of update queries against SingleStore. These update queries implement asking every AI for their next action and then resolving all actions.
 
 The key technologies used are:
 * every solar system is sharded to a specific partition which allows this demo to horizontally scale
 * wasm is used to embed complex agent behavior into the engine and run it in parallel over all of the entities
 * the game client is written in javascript and runs in the browser - so we use the data api to run queries directly against singlestore to gather and display game state
-* the demo is designed to work perfectly alongside workspaces in order to better scale out to many game clients all observing the simulation concurrently
+* the demo is designed to work perfectly with multiple workspaces in order to support many game clients all observing the simulation concurrently
 
 ## Turn Resolution
-![turn resolution](images/turn_resolution.png)
+
+<p align="center">
+  <img src="web/assets/turn_resolution_simple.png" alt="turn resolution">
+</p>
+
+1. All ships can see entities up to 8 cells away.
+2. Each ship decides what to do from the following options:
+    - **Hold (energy: 1):** The ship stays where it is.
+    - **Move (energy: 2):** The ship moves up to its speed in a
+      cardinal direction.
+    - **Upgrade (energy: 50):** The ship upgrades its Blasters,
+      Harvesters, or Thrusters.
+3. All actions are resolved at the same time in a single database
+    transaction and the game rules are applied.
+
+### Detailed rules
+
+- Ships at the same location will fight. Damage is calculated based on
+  the number of blasters each ship has.
+- Ships alone in a call with energy nodes will consume some amount of
+  energy based on the number of harvesters the ship has.
+- A ship may only move up to N cells per turn where N is the number of
+  thrusters the ship has.
+- Each ship has a shield which recharges 1% per turn if the ship is not
+  in combat.
+- Any ship which looses all of its shield explodes, leaving behind all
+  of its energy at the ships location.
+- Any ship which runs out of energy explodes leaving nothing behind.
 
 ## Architecture
-![architecture](images/architecture.png)
+
+This game runs entirely within [SingleStore][s2] and the browser.
+SingleStore, a scale out relational database optimized for transactions
+and analytics, stores the game state and handles turn resolution. The
+game client runs in the browser and communicates directly with
+SingleStore over our [Data API][data-api].
+
+<p align="center">
+  <img src="web/assets/architecture_diagram.png" alt="architecture">
+</p>
 
 # Running the demo locally
 
-1. run singlestore in a docker container (make sure it has data api and wasm enabled) or maybe somewhere else if you are adventurous
-2. update backend/config.example.toml to point at your container
-   * database.host/database.port should point at the mysql endpoint of your singlestore cluster (one of the aggs)
-   * web.endpoints should be an array of urls to the data api port of your SingleStore cluster - the web frontend will load balance over these endpoints (i.e. you can provide workspace endpoints here)
+1. spin up SingleStore [on the managed service][try-free]
+2. copy backend/config.example.toml to backend/config.toml and update
+   * database.host/database.port should point at a mysql protocol endpoint
+   * web.endpoints should be an array of urls to the data api port of your SingleStore cluster - the web frontend will load balance over these endpoints (i.e. you can provide readonly workspace endpoints here)
 3. compile the agent:
    ```bash
    cd agent
@@ -30,91 +66,26 @@ The key technologies used are:
    ```bash
    cd backend
    go build -o backend
-   ./backend --config config.example.toml
+   ./backend --config config.toml
    ```
 6. run the frontend
    ```bash
    cd web
    yarn
    yarn dev
-7. open your browser to http://localhost:3000#sid=0
-8. create some entities with sid=0 (sid is the id of the solar system) (see schema.sql for examples)
+7. open your browser to http://localhost:3000
+8. generate some solar systems
+    ```sql
+    -- run this once
+    insert into solar_system (x, y) values (floor(rand(now()) * 500), floor(rand(now() + 1) * 500));
 
-Notice that the url contains useful things like the sid to look at. This will get fancier once I build the universe map, but till then you can look at solar systems by changing `sid=X` in the url.
+    -- then run this a couple times, each time will double the number of solar systems. I don't recommend running more than 1000 solar systems on a single machine.
+    insert into solar_system (x, y) select floor(rand(now() + sid) * 500) x, floor(rand(now() + sid + 1) * 500) y from solar_system;
+    ```
 
-You can also add `debug=true` to see the grid and `play=true` for a simple sprite playground.
+**Have fun!**
 
-Have fun!
-
-## game world
-
-The game is set in space and composed of many independent solar systems.
-
-Each solarsystem is periodically seeded with a random number of asteroids of differing sizes. The asteroids move slowly in a fixed pattern around the system.
-
-Each solar system has a fixed number of warp-gates to adjacent solar systems. Warp-gates are invincible.
-
-## ships
-
-Each "player" whether human or AI is a single ship spawned randomly in the universe. A ship starts with a small amount of initial resources and one of each component.
-
-Ships have the following properties:
-
-* shield
-  * a ship explodes upon reaching 0 shield
-  * starts with 100 shield which is also the maximum
-  * shield is damaged by the blasters on other ships
-  * shield recovers 1 shield every turn
-* blasters
-  * a ship starts with one blaster
-  * a ship can't have more than 10 blasters
-  * a ship can use it's blasters to attack other ships
-* thrusters
-  * a ship starts with one thruster
-  * a ship can't have more than 10 thrusters
-  * a ship can move up to as many cells as it has thrusters in a straight line per turn
-* harvesters
-  * a ship starts with one harvester
-  * a ship can't have more than 10 harvesters
-  * a ship can use it's harvesters to absorb energy from energy nodes
-* energy
-  * a ship starts with 100 energy
-  * a ship gains energy by harvesting energy nodes
-  * a ship spends energy to take actions, each action consumes a different amount of energy.
-
-Ships can buy additional blasters, thrusters, and harvesters using energy.
-
-## objective
-
-The objective of the game is to survive as long as possible.
-
-## actions
-
-Actions are encoded into a single byte:
-
-The 3 high bits encode the action
-The 5 low bits encode the argument
-
-000 00000
-
-* hold
-  * costs 1 energy
-  * high: 000
-  * low: 00000
-* move
-  * costs 5 energy
-  * high: 001-100 (north, east, south, west)
-  * low: distance
-* upgrade
-  * costs 50 energy
-  * bits: 101
-  * low
-    * 00000: blaster
-    * 00001: thruster
-    * 00010: harvester
-
-## turn order
-
-1. every entity chooses a single action to take
-   * entity's can only see the position and kind of every other object in the current solar system and less than 8 cells away
-2. 
+[s2]: https://www.singlestore.com
+[data-api]: https://docs.singlestore.com/managed-service/en/reference/data-api.html
+[try-free]: https://www.singlestore.com/cloud-trial/
+[code-engine]: https://docs.singlestore.com/managed-service/en/reference/code-engine---powered-by-wasm.html
