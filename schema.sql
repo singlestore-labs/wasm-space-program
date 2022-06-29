@@ -12,7 +12,8 @@ create table if not exists turns (
   slot BIGINT NOT NULL PRIMARY KEY,
   tid BIGINT NOT NULL,
   start_time DATETIME(6) DEFAULT NOW(6) SERIES TIMESTAMP,
-  end_time DATETIME(6) DEFAULT NULL
+  end_time DATETIME(6) DEFAULT NULL,
+  writes BIGINT DEFAULT NULL
 );
 
 create table if not exists solar_system (
@@ -201,6 +202,13 @@ create or replace procedure run_turn()
 as declare
   turn_id bigint;
   entity_next query(sid bigint, eid bigint, plan bigint unsigned) = gen_entity_next();
+  q_total_writes query(c bigint) =  select variable_value as c
+                                    from information_schema.mv_global_status
+                                    where
+                                      node_type = "MA"
+                                      and variable_name = "Rows_affected_by_writes";
+  total_writes_start bigint = scalar(q_total_writes);
+  delta_writes bigint;
 begin
   start transaction;
 
@@ -283,8 +291,13 @@ begin
   -- remove energyless entities
   delete from entity where energy <= 0;
 
+  -- measure the number of writes we just ran
+  delta_writes = scalar(q_total_writes) - total_writes_start;
+
   -- finalize the turn
-  update turns set end_time = NOW(6) where tid = turn_id;
+  update turns
+    set end_time = NOW(6), writes = delta_writes
+    where tid = turn_id;
 
   commit;
 exception when others then

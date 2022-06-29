@@ -164,14 +164,17 @@ export const queryNumEntitiesByKind = (config: ClientConfig) =>
     )
   );
 
-export const queryAvgTurnTime = (config: ClientConfig) =>
-  QueryOne<{ t: number }>(
+export const queryTurnInfo = (config: ClientConfig) =>
+  QueryOne<{ avgTurnTime: number; avgWrites: number }>(
     config,
     `
-      select avg(timestampdiff(microsecond, start_time, end_time)) as t
-      from turns where end_time is not null
+      select
+        avg(timestampdiff(microsecond, start_time, end_time)) :> bigint as avgTurnTime,
+        ifnull(avg(writes), 0) :> bigint as avgWrites
+      from turns
+      where end_time is not null
     `
-  ).then((r) => r.t / 1000);
+  );
 
 export const queryNumSystems = (config: ClientConfig) =>
   QueryOne<{ c: number }>(
@@ -202,16 +205,16 @@ export const queryAvgEntitiesPerSystem = (config: ClientConfig) =>
   );
 
 export const queryGlobalStats = async (config: ClientConfig) => {
-  const [numEntities, avgTurnTime, avgEntitiesPerSystem, numSystems] =
+  const [numEntities, turnInfo, avgEntitiesPerSystem, numSystems] =
     await Promise.all([
       queryNumEntitiesByKind(config),
-      queryAvgTurnTime(config),
+      queryTurnInfo(config),
       queryAvgEntitiesPerSystem(config),
       queryNumSystems(config),
     ]);
   return {
     numEntities,
-    avgTurnTime,
+    turnInfo,
     avgEntitiesPerSystem,
     numSystems,
   };
