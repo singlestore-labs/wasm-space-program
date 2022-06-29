@@ -36,7 +36,6 @@ export const SelectedInfo = () => {
     {
       isPaused: () => paused || selectedKind === "SolarSystem",
       refreshInterval: 1000,
-      dedupingInterval: 1000,
     }
   );
 
@@ -50,7 +49,6 @@ export const SelectedInfo = () => {
     {
       isPaused: () => paused || selectedKind !== "SolarSystem",
       refreshInterval: 1000,
-      dedupingInterval: 1000,
     }
   );
 

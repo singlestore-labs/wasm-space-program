@@ -119,8 +119,12 @@ export const queryEntitiesByEntityLocation = (
       FROM entity
       LEFT JOIN entity same_location ON (
         entity.sid = same_location.sid
-        and entity.x = same_location.x
-        and entity.y = same_location.y
+        and ((
+          entity.x = same_location.x
+          and entity.y = same_location.y
+        ) or (
+          entity.eid = same_location.eid
+        ))
       )
       WHERE entity.eid = ?
       ORDER BY same_location.eid
