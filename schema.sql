@@ -122,6 +122,29 @@ create view entity_harvest as (
   group by entity.sid, entity.eid
 );
 
+drop view if exists entity_with_packed_neighbors;
+create view entity_with_packed_neighbors as (
+  select
+    entity.*,
+    group_concat(pack(row(
+      coalesce(neighbor.kind, 0),
+      coalesce(neighbor.blasters, 0),
+      coalesce(neighbor.x, 0),
+      coalesce(neighbor.y, 0)
+    )) separator '') as neighbors
+  from entity
+  left join entity neighbor on (
+    entity.sid = neighbor.sid
+    and entity.eid != neighbor.eid
+    and distance_2d(
+      entity.x, entity.y,
+      neighbor.x, neighbor.y
+    ) < 16
+  )
+  where entity.kind = 1 -- ship
+  group by entity.sid, entity.eid
+);
+
 delimiter //
 
 create or replace procedure gen_entity_next()
@@ -129,52 +152,31 @@ returns query(sid bigint, eid bigint, plan bigint unsigned)
 as declare
   query_prefix text = "
     select
-      entity.sid, entity.eid,
+      sid, eid,
       (case
   ";
   query_suffix text = "
       ) as plan
-    from entity
-    left join entity neighbor on (
-      entity.sid = neighbor.sid
-      and entity.eid != neighbor.eid
-      and distance_2d(
-        entity.x, entity.y,
-        neighbor.x, neighbor.y
-      ) < 16
-    )
-    where entity.kind = 1 -- ship
-    group by entity.sid, entity.eid
+    from entity_with_packed_neighbors
   ";
   strategy_input text = "
     row(
-      entity.kind,
-      entity.x,
-      entity.y,
-      entity.energy,
-      entity.shield,
-      entity.blasters,
-      entity.thrusters,
-      entity.harvesters
+      kind, x, y, energy, shield,
+      blasters, thrusters, harvesters
     ),
-    entity.last_plan,
-    group_concat(pack(row(
-      coalesce(neighbor.kind, 0),
-      coalesce(neighbor.blasters, 0),
-      coalesce(neighbor.x, 0),
-      coalesce(neighbor.y, 0)
-    )) separator '')
+    last_plan,
+    neighbors
   ";
   query_cases text = "";
   get_strategies query(udf text) = select udf from entity_strategy;
   strategies array(record(udf text)) = collect(get_strategies);
 begin
   for strat in strategies loop
-    query_cases = concat(query_cases, "when entity.strategy = ", quote(strat.udf), " then ", strat.udf, "(", strategy_input, ")");
+    query_cases = concat(query_cases, "when strategy = ", quote(strat.udf), " then ", strat.udf, "(", strategy_input, ")");
   end loop;
 
   -- default case
-  query_cases = concat(query_cases, "when entity.strategy is null then strategy_default(", strategy_input, ") end");
+  query_cases = concat(query_cases, "when strategy is null then strategy_default(", strategy_input, ") end");
 
   return to_query(concat(query_prefix, query_cases, query_suffix));
 end //
