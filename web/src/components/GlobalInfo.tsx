@@ -128,7 +128,7 @@ const StatTable = () => {
 
   const info = [
     {
-      label: "Average Turn Time",
+      label: "Avg Turn Time",
       value: formatMs(stats.avgTurnTime),
     },
     {
@@ -140,7 +140,7 @@ const StatTable = () => {
       value: formatNumber(stats.numEntities.Ship),
     },
     {
-      label: "Average ships per system",
+      label: "Avg ships / system",
       value: formatNumber(stats.avgEntitiesPerSystem.Ship),
     },
     {
@@ -148,10 +148,10 @@ const StatTable = () => {
       value: formatNumber(stats.numEntities.EnergyNode),
     },
     {
-      label: "Average ships per system",
+      label: "Avg energy nodes / system",
       value: formatNumber(stats.avgEntitiesPerSystem.EnergyNode),
     },
   ];
 
-  return <StatList minWidth={340} stats={info} />;
+  return <StatList minWidth={300} stats={info} />;
 };

@@ -26,7 +26,7 @@ create reference table if not exists entity_strategy (
   udf text primary key
 );
 
-create rowstore table if not exists entity (
+create table if not exists entity (
   sid BIGINT NOT NULL,
   eid BIGINT NOT NULL AUTO_INCREMENT,
 
