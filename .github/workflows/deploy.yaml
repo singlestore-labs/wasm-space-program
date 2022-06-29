@@ -58,7 +58,7 @@ jobs:
         working-directory: agent
 
       - name: Build
-        run: cargo wasi build --release
+        run: cargo build --release --target wasm32-wasi
         working-directory: agent
 
   backend:

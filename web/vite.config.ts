@@ -14,22 +14,4 @@ export default defineConfig({
       },
     }),
   ],
-  build: {
-    chunkSizeWarningLimit: 512,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          pixi: ["pixi.js"],
-          react: [
-            "react",
-            "react-dom",
-            "react-markdown",
-            "react-router-dom",
-            "rooks",
-            "@inlet/react-pixi",
-          ],
-        },
-      },
-    },
-  },
 });
