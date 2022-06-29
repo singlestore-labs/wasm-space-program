@@ -1,3 +1,6 @@
+// BytesCast generates some identity operations so we need to ignore this
+#![allow(clippy::identity_op)]
+
 use std::fmt::{self};
 
 use crate::command::{Command, CommandDecodeError};

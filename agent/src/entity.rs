@@ -1,3 +1,6 @@
+// BytesCast generates some identity operations so we need to ignore this
+#![allow(clippy::identity_op)]
+
 use crate::interface::{Entity, EntitySummary};
 use crate::point::Point;
 use bytes_cast::BytesCast;

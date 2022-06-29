@@ -1,6 +1,8 @@
 wit_bindgen_rust::export!("interface.wit");
 
-use crate::agent::{execute_strategy, strategy_default, strategy_random, strategy_flee, strategy_battle};
+use crate::agent::{
+    execute_strategy, strategy_battle, strategy_default, strategy_flee, strategy_random,
+};
 use crate::plan::Plan;
 pub use interface::{Entity, EntitySummary};
 

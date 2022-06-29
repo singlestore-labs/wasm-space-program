@@ -154,7 +154,8 @@ chain_strategies!(
 
 chain_strategies!(name = strategy_random, strategy::random_move,);
 
-chain_strategies!(name = strategy_flee,
+chain_strategies!(
+    name = strategy_flee,
     strategy::flee_move,
     strategy::upgrade_thrusters,
     strategy::chase_energy,
@@ -162,7 +163,8 @@ chain_strategies!(name = strategy_flee,
     strategy::random_move,
 );
 
-chain_strategies!(name = strategy_battle,
+chain_strategies!(
+    name = strategy_battle,
     strategy::battle_move,
     strategy::upgrade_blasters,
     strategy::upgrade_thrusters,

@@ -1,4 +1,3 @@
-import { AssetContext } from "@/components/AssetLoader";
 import { DebugPlayground } from "@/components/DebugPlayground";
 import { SolarSystem } from "@/components/SolarSystem";
 import { UniverseMap } from "@/components/UniverseMap";
@@ -13,7 +12,7 @@ import {
 import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
 
 export const Router = () => {
   const { width, height } = useWindowSize();
@@ -22,7 +21,6 @@ export const Router = () => {
   const setViewport = useSetAtom(viewportAtom);
   const setSelectedObject = useSetAtom(selectedObjectAtom);
   const debugPlayground = useAtomValue(debugPlaygroundAtom);
-  const { starsTile } = useContext(AssetContext);
 
   const [showUniverseMap, setShowUniverseMap] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
