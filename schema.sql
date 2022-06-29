@@ -51,7 +51,10 @@ create table if not exists entity (
   last_plan BIGINT UNSIGNED NOT NULL DEFAULT 0,
 
   PRIMARY KEY (sid, eid),
-  SHARD KEY (sid)
+  SORT KEY (sid, eid),
+  SHARD KEY (sid),
+
+  KEY (eid) USING HASH
 );
 
 source functions.sql;

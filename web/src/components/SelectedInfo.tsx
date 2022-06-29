@@ -14,6 +14,7 @@ import {
   querySolarSystem,
   SolarSystemInfoRow,
 } from "@/data/queries";
+import { swrLaggy } from "@/data/swr";
 import { CloseIcon } from "@chakra-ui/icons";
 import { Box, Flex, IconButton, Stack } from "@chakra-ui/react";
 import { useAtom, useAtomValue } from "jotai";
@@ -36,6 +37,7 @@ export const SelectedInfo = () => {
     {
       isPaused: () => paused || selectedKind === "SolarSystem",
       refreshInterval: 1000,
+      use: [swrLaggy],
     }
   );
 
