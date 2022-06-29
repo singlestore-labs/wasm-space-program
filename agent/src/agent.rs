@@ -75,6 +75,72 @@ mod strategy {
             Some(Command::Move(dir, e.thrusters))
         }
     }
+
+    agent_strategy! {
+        flee_move(_mem, _last, e, system) => {
+            let position = e.position();
+
+            let mut target_distance: f32 = f32::MAX;
+            let mut target: Option<Point> = None;
+
+            // is there an enemy nearby?
+            for n in system {
+                // find the closest enemy
+                if n.is_ship() {
+                    let dist = position.distance(&n.position());
+                    if dist < target_distance {
+                        target_distance = dist;
+                        target = Some(n.position());
+                    }
+                }
+            }
+
+            // if there is an enemy, run the other way
+            target.map(|t| {
+                let (dir, mut dist) = position.direction_and_distance(&t);
+                dist = dist.min(e.thrusters);
+
+                // move in the opposite direction
+                // we never hold (stand and fight), we run!
+                Command::Move(dir.opposite(), dist)
+            })
+
+            // if this were a little smarter...
+            // it would keep track of ships that are actively advancing/chasing
+        }
+    }
+
+    agent_strategy! {
+        battle_move(_mem, _last, e, system) => {
+            let position = e.position();
+
+            let mut target_distance: f32 = f32::MAX;
+            let mut target: Option<Point> = None;
+
+            // is there an enemy nearby?
+            for n in system {
+                // find the closest enemy
+                if n.is_ship() {
+                    let dist = position.distance(&n.position());
+                    if dist < target_distance {
+                        target_distance = dist;
+                        target = Some(n.position());
+                    }
+                }
+            }
+
+            // if we find a target, move towards it or stay on it
+            target.map(|t| {
+                let (dir, mut dist) = position.direction_and_distance(&t);
+                if dist > 0 {
+                    dist = dist.min(e.thrusters);
+                    Command::Move(dir, dist)
+                } else {
+                    Command::Hold // battle
+                }
+            })
+        }
+    }
 }
 
 chain_strategies!(
@@ -87,6 +153,23 @@ chain_strategies!(
 );
 
 chain_strategies!(name = strategy_random, strategy::random_move,);
+
+chain_strategies!(name = strategy_flee,
+    strategy::flee_move,
+    strategy::upgrade_thrusters,
+    strategy::chase_energy,
+    strategy::upgrade_harvestors,
+    strategy::random_move,
+);
+
+chain_strategies!(name = strategy_battle,
+    strategy::battle_move,
+    strategy::upgrade_blasters,
+    strategy::upgrade_thrusters,
+    strategy::chase_energy,
+    strategy::upgrade_harvestors,
+    strategy::random_move,
+);
 
 pub fn execute_strategy(
     strategy: Strategy,

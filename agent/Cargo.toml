@@ -3,7 +3,9 @@ name = "agent"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.component]
+# we are not using components (only wit)
+# some Wasm tools expect this section
 
 [dependencies]
 wit-bindgen-rust = { git = "https://github.com/bytecodealliance/wit-bindgen.git" }

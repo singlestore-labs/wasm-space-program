@@ -23,7 +23,7 @@ The key technologies used are:
 3. compile the agent:
    ```bash
    cd agent
-   cargo wasi build
+   cargo wasi build --release
    ```
 4. run schema.sql on your singlestore cluster
 5. run the backend:

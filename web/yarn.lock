@@ -1099,20 +1099,10 @@
   resolved "https://registry.yarnpkg.com/@pixi/filter-fxaa/-/filter-fxaa-6.4.2.tgz#29f4fe2a0dc073590561d7eb18aa84924a98a6da"
   integrity sha512-euUeo/FAQ9DfnRYmxcA9wqAzU8y3VRvgptuur/sFPGgWDQqoOOLzBqRDU8/Mhj0NM9ixswrUHBTg8FN5ToP2yw==
 
-"@pixi/filter-glitch@^4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@pixi/filter-glitch/-/filter-glitch-4.1.5.tgz#b657a2a79eedc645b7a77e0afb96dbf7413c5e8b"
-  integrity sha512-x7l7XbrLqCoScYfRZmy/x1/KXOGXWpf7a4fcygc+n+jIm/IFwA93KvSJx9reBQzcONl5JXBOJVnFeLYcjP5J3w==
-
 "@pixi/filter-noise@6.4.2":
   version "6.4.2"
   resolved "https://registry.yarnpkg.com/@pixi/filter-noise/-/filter-noise-6.4.2.tgz#588c779336716ce6ec1adabc75dd199c5fd262a8"
   integrity sha512-WvtpU1JHKujwoRHP7vqcOQ700ZH6faFXVSG6+ot9giJldk1sf5xNK7tKjSEkhcQgI7VwAqwMy/z4Jho+clCPgg==
-
-"@pixi/filter-zoom-blur@^4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@pixi/filter-zoom-blur/-/filter-zoom-blur-4.1.5.tgz#7602636fc6b19c0c0f26cc4db26fb838593e5ae8"
-  integrity sha512-peynWrG88pF4GYXLLmrQFc1tl/yZWkE0Vken4i0I2rpwvUPkyzYPgMYeRUG+/DsP/q+5+dopnzHOrrdJORgF2w==
 
 "@pixi/graphics@6.4.2":
   version "6.4.2"
