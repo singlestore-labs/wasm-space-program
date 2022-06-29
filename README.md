@@ -19,8 +19,7 @@ The key technologies used are:
     - **Hold (energy: 1):** The ship stays where it is.
     - **Move (energy: 2):** The ship moves up to its speed in a
       cardinal direction.
-    - **Upgrade (energy: 50):** The ship upgrades its Blasters,
-      Harvesters, or Thrusters.
+    - **Upgrade (energy: 50):** The ship upgrades its Blasters, Harvesters, or Thrusters.
 3. All actions are resolved at the same time in a single database
     transaction and the game rules are applied.
 
@@ -54,8 +53,8 @@ SingleStore over our [Data API][data-api].
 
 1. spin up SingleStore [on the managed service][try-free]
 2. copy backend/config.example.toml to backend/config.toml and update
-   * database.host/database.port should point at a mysql protocol endpoint
-   * web.endpoints should be an array of urls to the data api port of your SingleStore cluster - the web frontend will load balance over these endpoints (i.e. you can provide readonly workspace endpoints here)
+    * database.host/database.port should point at a mysql protocol endpoint
+    * web.endpoints should be an array of urls to the data api port of your SingleStore cluster - the web frontend will load balance over these endpoints (i.e. you can provide readonly workspace endpoints here)
 3. compile the agent:
    ```bash
    cd agent
