@@ -2073,7 +2073,7 @@ PERFORMANCE OF THIS SOFTWARE.
         eid = ?
     `,t),T0e=(e,t)=>w0e(e,t).catch(()=>null),E0e=e=>cf(e,"select kind, count(*) as count from entity group by kind").then(t=>t.reduce((r,n)=>(r[wp[n.kind]]=n.count,r),{Ship:0,EnergyNode:0})),S0e=e=>Uy(e,`
       select
-        avg(timestampdiff(microsecond, start_time, end_time)) :> bigint as avgTurnTime,
+        avg(timestampdiff(microsecond, start_time, end_time)) / 1000 :> double as avgTurnTime,
         ifnull(avg(writes), 0) :> bigint as avgWrites
       from turns
       where end_time is not null
