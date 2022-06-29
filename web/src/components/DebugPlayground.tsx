@@ -28,10 +28,10 @@ export const DebugPlayground = ({ width, height }: Props) => {
         tileScale={[1, 1]}
       />
       <DebugGrid width={SOLAR_SYSTEM_SIZE_PX} height={SOLAR_SYSTEM_SIZE_PX} />
-      <Container x={CELL_SIZE_PX*30} y={CELL_SIZE_PX*30}>
+      <Container x={CELL_SIZE_PX * 30} y={CELL_SIZE_PX * 30}>
         <SpriteGrid />
       </Container>
-      <Container x={CELL_SIZE_PX*44} y={CELL_SIZE_PX*30}>
+      <Container x={CELL_SIZE_PX * 44} y={CELL_SIZE_PX * 30}>
         <SpriteGrid selected />
       </Container>
 

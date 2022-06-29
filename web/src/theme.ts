@@ -1,5 +1,4 @@
 import { extendTheme } from "@chakra-ui/react";
-import "@fontsource/inter/variable-full.css";
 import "@fontsource/source-code-pro/variable.css";
 import memoize from "fast-memoize";
 
@@ -70,11 +69,11 @@ import type { PartsStyleObject } from "@chakra-ui/theme-tools";
 const tableStyle: PartsStyleObject<typeof tableAnatomy> = {
   th: {
     borderBottom: "1px",
-    borderColor: "purple.400"
+    borderColor: "purple.400",
   },
   td: {
     borderBottom: "1px",
-    borderColor: "purple.400"
+    borderColor: "purple.400",
   },
 };
 

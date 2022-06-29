@@ -3,35 +3,40 @@ on: [push]
 jobs:
   frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: web
-
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
 
       - name: Install & cache web dependencies
         uses: bahmutov/npm-install@v1
+        with:
+          working-directory: web
+
+      - name: Format
+        run: yarn prettier --check .
+        working-directory: web
+
+      - name: Lint
+        run: yarn eslint
+        working-directory: web
 
       - name: Check typescript
         run: yarn run tsc
+        working-directory: web
 
       - name: Build
         run: yarn run vite build
+        working-directory: web
 
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4.2.3
         with:
           branch: gh-pages
-          folder: dist
+          folder: web/dist
 
   agent:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: agent
 
     steps:
       - name: Checkout source
@@ -44,32 +49,27 @@ jobs:
           components: rustfmt, rust-src, clippy
           target: wasm32-wasi
 
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Clippy
+        run: cargo clippy
+        working-directory: agent
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --check
+      - name: Format
+        run: cargo fmt --check
+        working-directory: agent
 
-      - uses: actions-rs/cargo@v1
-        with:
-          command: wasi
-          args: build --release
+      - name: Build
+        run: cargo wasi build --release
+        working-directory: agent
 
   backend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
 
       - name: Build
         run: go build
+        working-directory: backend
 
       - name: Install fly
         if: github.ref == 'refs/heads/main'
@@ -80,3 +80,4 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only
+        working-directory: backend

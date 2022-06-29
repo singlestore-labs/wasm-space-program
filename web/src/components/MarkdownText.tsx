@@ -3,7 +3,6 @@ import { Image, ImageProps, Link } from "@chakra-ui/react";
 import ChakraUIRenderer from "chakra-ui-markdown-renderer";
 import ReactMarkdown, { Components } from "react-markdown";
 import { ReactMarkdownOptions } from "react-markdown/lib/react-markdown";
-import { NavLink as RouterLink } from "react-router-dom";
 import dedent from "ts-dedent";
 
 export const ImageFloatRightTag = "#floatRight";
@@ -28,25 +27,19 @@ const theme: Components = ChakraUIRenderer({
   a: ({ children, ...props }) => {
     const { href } = props;
     const isExternal = !!href?.startsWith("http");
-    if (isExternal) {
-      return (
-        <Link isExternal={isExternal} {...props}>
-          {children}
+    return (
+      <Link isExternal={isExternal} {...props}>
+        {children}
+        {isExternal ? (
           <ExternalLinkIcon
             bottom="2px"
             boxSize="0.9em"
             position="relative"
             ml={1}
           />
-        </Link>
-      );
-    } else {
-      return (
-        <Link to={href || ""} {...props} as={RouterLink}>
-          {children}
-        </Link>
-      );
-    }
+        ) : null}
+      </Link>
+    );
   },
 });
 
