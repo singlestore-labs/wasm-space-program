@@ -307,14 +307,17 @@ end //
 create or replace procedure spawn(min_ships int, min_energy_nodes int)
 as declare
   turn_id bigint;
+  q_strategy query(udf text) = select udf from entity_strategy order by rand() limit 1;
+  strategy text = scalar(q_strategy);
 begin
   start transaction;
 
-  insert into entity (sid, kind, x, y)
+  insert into entity (sid, kind, x, y, strategy)
   select
     sid, 1 as kind,
     floor(rand(now() + sid + 0) * 100) as x,
-    floor(rand(now() + sid + 1) * 100) as y
+    floor(rand(now() + sid + 1) * 100) as y,
+    strategy
   from solar_system
   where
     (

@@ -91,17 +91,26 @@ const PixiComponentViewport = PixiComponent("Viewport", {
   },
 
   applyProps(instance, oldProps, newProps) {
+    let changed = false;
     if (oldProps.scale !== newProps.scale) {
       instance.setZoom(newProps.scale);
+      changed = true;
     }
     if (oldProps.x !== newProps.x || oldProps.y !== newProps.y) {
       instance.moveCenter(newProps.x, newProps.y);
+      changed = true;
     }
     if (
       oldProps.screenWidth !== newProps.screenWidth ||
       oldProps.screenHeight !== newProps.screenHeight
     ) {
       instance.resize(newProps.screenWidth, newProps.screenHeight);
+      changed = true;
+    }
+
+    if (changed) {
+      newProps.onBoundsChanged?.(instance.getVisibleBounds());
+      newProps.onScaleChanged?.(instance.scale.x);
     }
   },
 });

@@ -12,17 +12,17 @@ mod strategy {
 
     agent_strategy! {
         upgrade_harvestors(_mem, _last, e, _system) =>
-            (e.harvesters < 5 && e.energy > (50 * (e.harvesters as u16))).then(|| Command::Upgrade(Component::Harvesters))
+            (e.harvesters < 10 && e.energy > (50 * (e.harvesters as u16))).then(|| Command::Upgrade(Component::Harvesters))
     }
 
     agent_strategy! {
         upgrade_thrusters(_mem, _last, e, _system) =>
-            (e.thrusters < 5 && e.energy > (50 * (e.thrusters as u16))).then(|| Command::Upgrade(Component::Thrusters))
+            (e.thrusters < 10 && e.energy > (50 * (e.thrusters as u16))).then(|| Command::Upgrade(Component::Thrusters))
     }
 
     agent_strategy! {
         upgrade_blasters(_mem, _last, e, _system) =>
-            (e.blasters < 5 && e.energy > (50 * (e.blasters as u16))).then(|| Command::Upgrade(Component::Blasters))
+            (e.blasters < 10 && e.energy > (50 * (e.blasters as u16))).then(|| Command::Upgrade(Component::Blasters))
     }
 
     agent_strategy! {
@@ -77,7 +77,7 @@ mod strategy {
     }
 
     agent_strategy! {
-        flee_move(_mem, _last, e, system) => {
+        flee_move(mem, _last, e, system) => {
             let position = e.position();
 
             let mut target_distance: f32 = f32::MAX;
@@ -90,28 +90,55 @@ mod strategy {
                     let dist = position.distance(&n.position());
                     if dist < target_distance {
                         target_distance = dist;
-                        target = Some(n.position());
+
+                        // only consider targets that are close enough to be dangerous
+                        target = if target_distance <= e.thrusters.into() {
+                            Some(n.position())
+                        } else {
+                            None
+                        }
                     }
                 }
             }
 
             // if there is an enemy, run the other way
             target.map(|t| {
-                let (dir, mut dist) = position.direction_and_distance(&t);
-                dist = dist.min(e.thrusters);
+                let (mut dir, _) = position.direction_and_distance(&t);
 
-                // move in the opposite direction
-                // we never hold (stand and fight), we run!
-                Command::Move(dir.opposite(), dist)
+                // in general we want to run the other way
+                dir = dir.opposite();
+
+                if position == t {
+                    // they are on top of us! break in a random direction
+                    dir = Direction::random();
+                }
+
+                // set flee counter to keep running for a little while
+                mem[0] = 3;
+                // set flee direction
+                mem[1] = dir as u8;
+
+                Command::Move(dir, e.thrusters)
+            }).or_else(|| {
+                // check flee counter and keep running even if we don't see anything
+                if mem[0] > 0 {
+                    mem[0] = mem[0].saturating_sub(1);
+                    let dir: Direction = mem[1].try_into().expect("invalid direction");
+                    Some(Command::Move(dir, e.thrusters))
+                } else {
+                    None
+                }
             })
-
-            // if this were a little smarter...
-            // it would keep track of ships that are actively advancing/chasing
         }
     }
 
     agent_strategy! {
-        battle_move(_mem, _last, e, system) => {
+        battle_move(mem, last, e, system) => {
+            if e.energy < 50 || e.shield < 20 {
+                // if we have less than 50 energy or 20 shield, flee instead
+                return flee_move(mem, last, e, system);
+            }
+
             let position = e.position();
 
             let mut target_distance: f32 = f32::MAX;
@@ -152,24 +179,22 @@ chain_strategies!(
     strategy::random_move,
 );
 
-chain_strategies!(name = strategy_random, strategy::random_move,);
-
 chain_strategies!(
     name = strategy_flee,
     strategy::flee_move,
     strategy::upgrade_thrusters,
-    strategy::chase_energy,
     strategy::upgrade_harvestors,
+    strategy::chase_energy,
     strategy::random_move,
 );
 
 chain_strategies!(
     name = strategy_battle,
-    strategy::battle_move,
     strategy::upgrade_blasters,
+    strategy::battle_move,
+    strategy::upgrade_harvestors,
     strategy::upgrade_thrusters,
     strategy::chase_energy,
-    strategy::upgrade_harvestors,
     strategy::random_move,
 );
 

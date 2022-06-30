@@ -25,7 +25,6 @@ decodeplan: func(p: plan) -> string
 applyplan: func(e: entity, p: plan) -> list<entity>
 
 // export agent strategies here! please prefix them with "strategy-"
-strategy-random: func(e: entity, last-plan: plan, system: list<u8>) -> plan
 strategy-flee: func(e: entity, last-plan: plan, system: list<u8>) -> plan
 strategy-battle: func(e: entity, last-plan: plan, system: list<u8>) -> plan
 

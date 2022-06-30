@@ -61,7 +61,7 @@ export const SelectedInfo = () => {
   const clearSelected = () => setSelectedObject(null);
 
   const nodes = [];
-  if (entities) {
+  if (entities && selectedKind !== "SolarSystem") {
     for (const entity of entities) {
       if (entity.eid === selectedObject?.id) {
         if (entity.kind === EntityKind.Ship) {
@@ -119,6 +119,7 @@ const ShipInfo = ({
         { label: "Blasters", value: formatNumber(entity.blasters) },
         { label: "Thrusters", value: formatNumber(entity.thrusters) },
         { label: "Harvesters", value: formatNumber(entity.harvesters) },
+        { label: "Strategy", value: entity.strategy.replace("strategy_", "") },
       ]}
     />
   </InfoBox>

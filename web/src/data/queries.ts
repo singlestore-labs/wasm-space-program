@@ -22,6 +22,7 @@ export type EntityRow = {
   kind: typeof EntityKind[keyof typeof EntityKind];
   x: number;
   y: number;
+  strategy: string;
 
   energy: number;
   shield: number;
@@ -50,6 +51,7 @@ export const querySolarSystemsInBounds = (
     WHERE
       x BETWEEN ? AND ?
       AND y BETWEEN ? AND ?
+    ORDER BY sid
   `,
     bounds.x,
     bounds.x + bounds.width,
@@ -98,7 +100,7 @@ export const queryEntities = (config: ClientConfig, sid: number) =>
     `
       SELECT
         sid, eid,
-        kind, x, y,
+        kind, x, y, strategy,
         energy, shield, blasters, thrusters, harvesters
       FROM entity
       WHERE
@@ -115,19 +117,23 @@ export const queryEntitiesByEntityLocation = (
   Query<EntityRow>(
     config,
     `
-      SELECT same_location.*
+      SELECT
+        sameloc.sid, sameloc.eid,
+        sameloc.kind, sameloc.x, sameloc.y,
+        sameloc.strategy, sameloc.energy, sameloc.shield,
+        sameloc.blasters, sameloc.thrusters, sameloc.harvesters
       FROM entity
-      LEFT JOIN entity same_location ON (
-        entity.sid = same_location.sid
+      LEFT JOIN entity sameloc ON (
+        entity.sid = sameloc.sid
         and ((
-          entity.x = same_location.x
-          and entity.y = same_location.y
+          entity.x = sameloc.x
+          and entity.y = sameloc.y
         ) or (
-          entity.eid = same_location.eid
+          entity.eid = sameloc.eid
         ))
       )
       WHERE entity.eid = ?
-      ORDER BY same_location.eid
+      ORDER BY sameloc.eid
     `,
     eid
   );
@@ -138,7 +144,7 @@ export const queryEntity = (config: ClientConfig, eid: number) =>
     `
       SELECT
         sid, eid,
-        kind, x, y,
+        kind, x, y, strategy,
         energy, shield, blasters, thrusters, harvesters
       FROM entity
       WHERE

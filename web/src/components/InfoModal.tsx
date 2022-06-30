@@ -270,11 +270,12 @@ const FindEntity = ({ onClose }: { onClose: () => void }) => {
 };
 
 const DEFAULT_QUERY = `
-select sid, count(*) num_entities
+select strategy, count(*) as num_ships
 from entity
-group by sid
-order by num_entities desc
-limit 10
+where
+  kind = 1
+group by strategy
+order by num_ships desc
 `.trim();
 
 const RunQuery = () => {

@@ -5,12 +5,10 @@ import { DebugOnly } from "@/components/DebugOnly";
 import { Viewport } from "@/components/Viewport";
 import {
   clientConfigAtom,
-  selectedObjectAtom,
-  sidAtom,
-  viewportAtom,
+  selectedObjectAtom, viewportAtom
 } from "@/data/atoms";
 import { cellToWorld, UNIVERSE_SIZE_PX, worldToCell } from "@/data/coordinates";
-import { querySolarSystemsInBounds } from "@/data/queries";
+import { querySolarSystem, querySolarSystemsInBounds } from "@/data/queries";
 import { swrLaggy } from "@/data/swr";
 import { TilingSprite } from "@inlet/react-pixi";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -31,7 +29,6 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
   const clientConfig = useAtomValue(clientConfigAtom);
   const [selectedObject, setSelectedObject] = useAtom(selectedObjectAtom);
   const setViewport = useSetAtom(viewportAtom);
-  const sid = useAtomValue(sidAtom);
 
   const [viewportBounds, setViewportBounds] = useState(
     new Rectangle(0, 0, 0, 0)
@@ -51,19 +48,31 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
     }
   );
 
-  useEffectOnceWhen(() => {
-    if (selectedObject && systems) {
-      const system = systems.find((s) => s.sid === selectedObject.id);
-      if (system) {
-        const [worldX, worldY] = cellToWorld(system.x, system.y);
-        setViewport({
-          x: worldX,
-          y: worldY,
-          scale: 1,
-        });
+  const { data: selectedSolarSystem } = useSWR(
+    ["querySolarSystem", selectedObject, clientConfig],
+    () => {
+      if (selectedObject) {
+        return querySolarSystem(clientConfig, selectedObject.id);
       }
+    },
+    {
+      isPaused: () => selectedObject?.kind !== "SolarSystem",
     }
-  }, !!(systems && selectedObject?.kind === "SolarSystem" && selectedObject?.id === sid));
+  );
+
+  useEffectOnceWhen(() => {
+    if (selectedSolarSystem) {
+      const [worldX, worldY] = cellToWorld(
+        selectedSolarSystem.x,
+        selectedSolarSystem.y
+      );
+      setViewport({
+        x: worldX,
+        y: worldY,
+        scale: 1,
+      });
+    }
+  }, !!selectedSolarSystem);
 
   const selectSolarSystem = useCallback(
     (sid: number) => {

@@ -1,5 +1,6 @@
 use crate::command::Direction;
 
+#[derive(PartialEq)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
