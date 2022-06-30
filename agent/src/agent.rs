@@ -67,8 +67,12 @@ mod strategy {
                 // use a counter to randomly change direction every so often
                 mem[FLAG_RANDOM_COUNTER] = mem[FLAG_RANDOM_COUNTER].wrapping_add(1) % 10;
                 if mem[FLAG_RANDOM_COUNTER] == 0 {
-                    // every 10th turn, pick a random direction
-                    Direction::random()
+                    // every 10th turn, pick the next direction
+                    if let Command::Move(dir, _) = last {
+                        dir.rotate()
+                    } else {
+                        Direction::random()
+                    }
                 } else if let Command::Move(dir, _) = last {
                     // otherwise move the same direction we are moving
                     *dir
@@ -98,7 +102,7 @@ mod strategy {
                         target_distance = dist;
 
                         // only consider targets that are close enough to be dangerous
-                        target = if target_distance <= e.thrusters.into() {
+                        target = if target_distance <= 4.0 {
                             Some(n.position())
                         } else {
                             None
@@ -120,9 +124,9 @@ mod strategy {
                 }
 
                 // set flee counter to keep running for a little while
-                mem[FLAG_FLEE_COUNTER] = 5;
-                // set flee direction
-                mem[FLAG_FLEE_DIRECTION] = dir as u8;
+                mem[FLAG_FLEE_COUNTER] = 2;
+                // set flee direction to be perpendicular to our chase vector
+                mem[FLAG_FLEE_DIRECTION] = dir.rotate() as u8;
 
                 Command::Move(dir, e.thrusters)
             }).or_else(|| {

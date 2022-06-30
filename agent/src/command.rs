@@ -160,6 +160,15 @@ impl Direction {
             Direction::West => Direction::East,
         }
     }
+
+    pub fn rotate(&self) -> Self {
+        match *self {
+            Direction::North => Direction::East,
+            Direction::East => Direction::South,
+            Direction::South => Direction::West,
+            Direction::West => Direction::North,
+        }
+    }
 }
 
 #[cfg(test)]
