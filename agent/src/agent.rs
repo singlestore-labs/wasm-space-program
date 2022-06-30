@@ -23,12 +23,12 @@ mod strategy {
 
     agent_strategy! {
         upgrade_thrusters(_mem, _last, e, _system) =>
-            (e.thrusters < 10 && e.energy > (50 * (e.thrusters as u16))).then(|| Command::Upgrade(Component::Thrusters))
+            (e.thrusters < 8 && e.energy > (50 * (e.thrusters as u16))).then(|| Command::Upgrade(Component::Thrusters))
     }
 
     agent_strategy! {
         upgrade_blasters(_mem, _last, e, _system) =>
-            (e.blasters < 10 && e.energy > (50 * (e.blasters as u16))).then(|| Command::Upgrade(Component::Blasters))
+            (e.blasters < 8 && e.energy > (50 * (e.blasters as u16))).then(|| Command::Upgrade(Component::Blasters))
     }
 
     agent_strategy! {
@@ -139,18 +139,22 @@ mod strategy {
     }
 
     agent_strategy! {
-        battle_move(mem, last, e, system) => {
+        battle_move(mem, _last, e, system) => {
+            // if we ever have > 100 energy, upgrade blasters!
+            if e.energy > 100 && e.blasters < 20 {
+                return Some(Command::Upgrade(Component::Blasters))
+            }
+
             if e.energy > 100 && e.shield > 60 {
-                // we are ready for battle
+                // ready for battle!
                 mem[FLAG_BATTLE_ENABLED] = 1;
             } else if e.energy < 50 || e.shield < 20 {
-                // if we have less than 50 energy or 20 shield,
-                // disable battle until we have 100 energy or 60 shield
+                // we are too weak for battle... :(
                 mem[FLAG_BATTLE_ENABLED] = 0;
             }
 
             if mem[FLAG_BATTLE_ENABLED] == 0 {
-                return flee_move(mem, last, e, system);
+                return None
             }
 
             let position = e.position();
@@ -204,7 +208,6 @@ chain_strategies!(
 
 chain_strategies!(
     name = strategy_battle,
-    strategy::upgrade_blasters,
     strategy::battle_move,
     strategy::upgrade_harvestors,
     strategy::upgrade_thrusters,
