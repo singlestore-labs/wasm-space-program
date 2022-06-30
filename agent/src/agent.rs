@@ -5,6 +5,12 @@ use crate::point::Point;
 use crate::strategy::{agent_strategy, chain_strategies, Strategy};
 use crate::system::System;
 
+// we have 7 bytes of memory to use for flags, keep track of the flag indexes here:
+const FLAG_FLEE_COUNTER: usize = 0;
+const FLAG_FLEE_DIRECTION: usize = 1;
+const FLAG_BATTLE_ENABLED: usize = 2;
+const FLAG_RANDOM_COUNTER: usize = 3;
+
 mod strategy {
     use crate::command::Direction;
 
@@ -59,8 +65,8 @@ mod strategy {
         random_move(mem, last, e, _system) => {
             let dir = {
                 // use a counter to randomly change direction every so often
-                mem[0] = mem[0].wrapping_add(1) % 10;
-                if mem[0] == 0 {
+                mem[FLAG_RANDOM_COUNTER] = mem[FLAG_RANDOM_COUNTER].wrapping_add(1) % 10;
+                if mem[FLAG_RANDOM_COUNTER] == 0 {
                     // every 10th turn, pick a random direction
                     Direction::random()
                 } else if let Command::Move(dir, _) = last {
@@ -114,16 +120,16 @@ mod strategy {
                 }
 
                 // set flee counter to keep running for a little while
-                mem[0] = 3;
+                mem[FLAG_FLEE_COUNTER] = 5;
                 // set flee direction
-                mem[1] = dir as u8;
+                mem[FLAG_FLEE_DIRECTION] = dir as u8;
 
                 Command::Move(dir, e.thrusters)
             }).or_else(|| {
                 // check flee counter and keep running even if we don't see anything
-                if mem[0] > 0 {
-                    mem[0] = mem[0].saturating_sub(1);
-                    let dir: Direction = mem[1].try_into().expect("invalid direction");
+                if mem[FLAG_FLEE_COUNTER] > 0 {
+                    mem[FLAG_FLEE_COUNTER] = mem[FLAG_FLEE_COUNTER].saturating_sub(1);
+                    let dir: Direction = mem[FLAG_FLEE_DIRECTION].try_into().unwrap_or_else(|_| Direction::random());
                     Some(Command::Move(dir, e.thrusters))
                 } else {
                     None
@@ -134,8 +140,16 @@ mod strategy {
 
     agent_strategy! {
         battle_move(mem, last, e, system) => {
-            if e.energy < 50 || e.shield < 20 {
-                // if we have less than 50 energy or 20 shield, flee instead
+            if e.energy > 100 && e.shield > 60 {
+                // we are ready for battle
+                mem[FLAG_BATTLE_ENABLED] = 1;
+            } else if e.energy < 50 || e.shield < 20 {
+                // if we have less than 50 energy or 20 shield,
+                // disable battle until we have 100 energy or 60 shield
+                mem[FLAG_BATTLE_ENABLED] = 0;
+            }
+
+            if mem[FLAG_BATTLE_ENABLED] == 0 {
                 return flee_move(mem, last, e, system);
             }
 
