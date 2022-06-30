@@ -22,7 +22,7 @@ export type EntityRow = {
   kind: typeof EntityKind[keyof typeof EntityKind];
   x: number;
   y: number;
-  strategy: string;
+  strategy: string | null;
 
   energy: number;
   shield: number;
