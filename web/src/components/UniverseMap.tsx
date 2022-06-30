@@ -5,7 +5,8 @@ import { DebugOnly } from "@/components/DebugOnly";
 import { Viewport } from "@/components/Viewport";
 import {
   clientConfigAtom,
-  selectedObjectAtom, viewportAtom
+  selectedObjectAtom,
+  viewportAtom,
 } from "@/data/atoms";
 import { cellToWorld, UNIVERSE_SIZE_PX, worldToCell } from "@/data/coordinates";
 import { querySolarSystem, querySolarSystemsInBounds } from "@/data/queries";
