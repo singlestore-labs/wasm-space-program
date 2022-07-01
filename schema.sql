@@ -95,6 +95,23 @@ create view cells_with_multiple_entities as (
   where c > 1
 );
 
+drop view if exists entities_with_conflict;
+create view entities_with_conflict as (
+  select eid
+  from entity a
+  where
+    a.kind = 1
+    and exists(
+      select * from entity b
+      where
+        a.sid = b.sid
+        and a.eid != b.eid
+        and a.x = b.x
+        and a.y = b.y
+        and b.kind = 1
+    )
+);
+
 drop view if exists entities_without_conflict;
 create view entities_without_conflict as (
   select a.*

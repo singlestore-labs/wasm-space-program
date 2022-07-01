@@ -225,3 +225,9 @@ export const queryGlobalStats = async (config: ClientConfig) => {
     numSystems,
   };
 };
+
+export const findBattle = (config: ClientConfig): Promise<number | null> =>
+  Query<{ eid: number }>(
+    config,
+    "select eid from entities_with_conflict limit 1"
+  ).then((r) => (r.length ? r[0].eid : null));

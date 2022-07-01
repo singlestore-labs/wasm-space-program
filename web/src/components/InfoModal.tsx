@@ -20,6 +20,7 @@ import {
   EntityKind,
   EntityKindsByValue,
   EntityKindStrings,
+  findBattle,
   queryEntityMaybe,
 } from "@/data/queries";
 import architectureURL from "@assets/architecture_diagram.png";
@@ -233,6 +234,13 @@ const FindEntity = ({ onClose }: { onClose: () => void }) => {
     onClose();
   }, [onClose, setSelectedEntity, setSid, setViewport, targetEntity]);
 
+  const onFindBattle = useCallback(async () => {
+    const battleEid = await findBattle(clientConfig);
+    if (battleEid) {
+      setEid(battleEid);
+    }
+  }, [clientConfig]);
+
   return (
     <>
       <Heading size="lg" my={4}>
@@ -264,6 +272,9 @@ const FindEntity = ({ onClose }: { onClose: () => void }) => {
         colorScheme="purple"
       >
         Warp!
+      </Button>
+      <Button mt={4} width="100%" onClick={onFindBattle} colorScheme="purple">
+        Find an entity in battle
       </Button>
     </>
   );

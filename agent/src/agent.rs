@@ -145,7 +145,7 @@ mod strategy {
     agent_strategy! {
         battle_move(mem, _last, e, system) => {
             // if we ever have > 100 energy, upgrade blasters!
-            if e.energy > 100 && e.blasters < 20 {
+            if e.energy > 100 && e.blasters < 15 {
                 return Some(Command::Upgrade(Component::Blasters))
             }
 
