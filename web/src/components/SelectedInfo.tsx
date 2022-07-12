@@ -92,7 +92,13 @@ export const SelectedInfo = () => {
       }
     }
   } else if (solarSystem) {
-    nodes.push(<SolarSystemInfo key={solarSystem.sid} system={solarSystem} />);
+    nodes.push(
+      <SolarSystemInfo
+        key={solarSystem.sid}
+        system={solarSystem}
+        onClose={clearSelected}
+      />
+    );
   }
 
   return <Stack>{nodes}</Stack>;
@@ -148,11 +154,18 @@ const EnergyNodeInfo = ({
   </InfoBox>
 );
 
-const SolarSystemInfo = ({ system }: { system: SolarSystemInfoRow }) => (
+const SolarSystemInfo = ({
+  system,
+  onClose,
+}: {
+  system: SolarSystemInfoRow;
+  onClose: () => void;
+}) => (
   <InfoBox
     stroke="#FFB000"
     fill="#9E6D00"
     title={`Solar System: 0x${system.sid.toString(16).toUpperCase()}`}
+    onClose={onClose}
   >
     <StatList
       p={2}

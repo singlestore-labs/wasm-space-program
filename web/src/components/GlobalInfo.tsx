@@ -6,7 +6,7 @@ import {
 } from "@/data/atoms";
 import { formatMs, formatNumber } from "@/data/format";
 import { queryGlobalStats } from "@/data/queries";
-import { InfoIcon } from "@chakra-ui/icons";
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import {
   Accordion,
   AccordionButton,
@@ -32,9 +32,9 @@ export const GlobalInfo = ({ onOpenInfo }: Props) => {
       <Flex
         backgroundColor="#311B92"
         border="2px 2px 0 2px solid #000"
-        borderBottom="2px solid #4f34c7"
         px={4}
         py={2}
+        mb={2}
         position="relative"
         _hover={{
           backgroundColor: "#3a20ae",
@@ -45,7 +45,7 @@ export const GlobalInfo = ({ onOpenInfo }: Props) => {
         <Box flex={1} fontWeight={600} fontSize="lg">
           Information
         </Box>
-        <InfoIcon position="relative" top="5px" right="2px" />
+        <ExternalLinkIcon position="relative" top="5px" right="2px" />
       </Flex>
       <Accordion
         backgroundColor="#311B92"
@@ -56,7 +56,6 @@ export const GlobalInfo = ({ onOpenInfo }: Props) => {
       >
         <AccordionItem border={0}>
           <AccordionButton
-            borderBottom="2px solid #4f34c7"
             _hover={{
               backgroundColor: "#3a20ae",
             }}

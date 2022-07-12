@@ -2,8 +2,8 @@
 port = 3001
 
 [worker]
-minShips = 32
-minEnergyNodes = 128
+minShips = 5
+minEnergyNodes = 5
 
 [database]
 host = "172.17.0.4"

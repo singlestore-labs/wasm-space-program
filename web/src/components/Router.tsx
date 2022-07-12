@@ -4,26 +4,42 @@ import { UniverseMap } from "@/components/UniverseMap";
 import { WarpTransition } from "@/components/WarpTransition";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import {
+  clientConfigAtom,
   debugPlaygroundAtom,
   selectedObjectAtom,
   sidAtom,
   viewportAtom,
 } from "@/data/atoms";
 import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
+import { querySolarSystem } from "@/data/queries";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
+import useSWR from "swr";
 
 export const Router = () => {
   const { width, height } = useWindowSize();
 
   const [sid, setSid] = useAtom(sidAtom);
   const setViewport = useSetAtom(viewportAtom);
-  const setSelectedObject = useSetAtom(selectedObjectAtom);
+  const [selectedObject, setSelectedObject] = useAtom(selectedObjectAtom);
   const debugPlayground = useAtomValue(debugPlaygroundAtom);
+  const clientConfig = useAtomValue(clientConfigAtom);
 
   const [showUniverseMap, setShowUniverseMap] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
+
+  const { data: selectedSolarSystem } = useSWR(
+    ["querySolarSystem", selectedObject, clientConfig],
+    () => {
+      if (selectedObject) {
+        return querySolarSystem(clientConfig, selectedObject.id);
+      }
+    },
+    {
+      isPaused: () => selectedObject?.kind !== "SolarSystem",
+    }
+  );
 
   const transitionToSolarSystem = useCallback(
     (sid: number) => {
@@ -35,7 +51,10 @@ export const Router = () => {
         y: SOLAR_SYSTEM_SIZE_PX / 2,
         scale: 1,
       });
-      setSelectedObject(null);
+      setSelectedObject({
+        kind: "SolarSystem",
+        id: sid,
+      });
     },
     [setSelectedObject, setSid, setViewport]
   );
@@ -49,11 +68,6 @@ export const Router = () => {
     }
     setShowUniverseMap(true);
   }, [setSelectedObject, sid]);
-
-  const closeUniverseMap = useCallback(() => {
-    setSelectedObject(null);
-    setShowUniverseMap(true);
-  }, [setSelectedObject]);
 
   if (debugPlayground) {
     return <DebugPlayground width={width} height={height} />;
@@ -74,7 +88,7 @@ export const Router = () => {
         width={width}
         height={height}
         onWarp={transitionToSolarSystem}
-        onClose={closeUniverseMap}
+        selectedSolarSystem={selectedSolarSystem}
       />
     );
   } else if (sid !== null) {

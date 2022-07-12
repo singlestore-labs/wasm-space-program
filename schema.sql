@@ -58,7 +58,7 @@ create table if not exists entity (
   KEY (eid) USING HASH
 );
 
-source functions.sql;
+source functions.sql
 
 drop view if exists entity_damage;
 create view entity_damage as (
@@ -168,8 +168,7 @@ create view entity_with_packed_neighbors as (
 
 delimiter //
 
-create or replace procedure gen_entity_next()
-returns query(sid bigint, eid bigint, plan bigint unsigned)
+create or replace procedure gen_entity_next() returns text
 as declare
   query_prefix text = "
     select
@@ -193,19 +192,19 @@ as declare
   strategies array(record(udf text)) = collect(get_strategies);
 begin
   for strat in strategies loop
-    query_cases = concat(query_cases, "when strategy = ", quote(strat.udf), " then ", strat.udf, "(", strategy_input, ")");
+    query_cases = concat(query_cases, "when strategy = ", quote(strat.udf), " then ", strat.udf, "(", strategy_input, ") ");
   end loop;
 
   -- default case
-  query_cases = concat(query_cases, "when strategy is null then strategy_default(", strategy_input, ") end");
+  query_cases = concat(query_cases, "else strategy_default(", strategy_input, ") end");
 
-  return to_query(concat(query_prefix, query_cases, query_suffix));
+  return concat(query_prefix, query_cases, query_suffix);
 end //
 
 create or replace procedure debug_next()
 returns query(sid bigint, eid bigint, x int, y int, plan text)
 as declare
-  entity_next query(sid bigint, eid bigint, plan bigint unsigned) = gen_entity_next();
+  entity_next query(sid bigint, eid bigint, plan bigint unsigned) = to_query(gen_entity_next());
   q query(sid bigint, eid bigint, x int, y int, plan text) =
     select
       entity.sid, entity.eid, entity.x, entity.y, 

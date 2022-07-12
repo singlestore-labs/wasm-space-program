@@ -9,7 +9,7 @@ import {
   viewportAtom,
 } from "@/data/atoms";
 import { cellToWorld, UNIVERSE_SIZE_PX, worldToCell } from "@/data/coordinates";
-import { querySolarSystem, querySolarSystemsInBounds } from "@/data/queries";
+import { querySolarSystemsInBounds, SolarSystemRow } from "@/data/queries";
 import { swrLaggy } from "@/data/swr";
 import { TilingSprite } from "@inlet/react-pixi";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -19,13 +19,18 @@ import { useEffectOnceWhen } from "rooks";
 import useSWR from "swr";
 
 type Props = {
+  selectedSolarSystem?: SolarSystemRow;
   width: number;
   height: number;
   onWarp: (sid: number) => void;
-  onClose: () => void;
 };
 
-export const UniverseMap = ({ onWarp, height, width }: Props) => {
+export const UniverseMap = ({
+  onWarp,
+  height,
+  width,
+  selectedSolarSystem,
+}: Props) => {
   const { starsTile } = useContext(AssetContext);
   const clientConfig = useAtomValue(clientConfigAtom);
   const [selectedObject, setSelectedObject] = useAtom(selectedObjectAtom);
@@ -49,29 +54,17 @@ export const UniverseMap = ({ onWarp, height, width }: Props) => {
     }
   );
 
-  const { data: selectedSolarSystem } = useSWR(
-    ["querySolarSystem", selectedObject, clientConfig],
-    () => {
-      if (selectedObject) {
-        return querySolarSystem(clientConfig, selectedObject.id);
-      }
-    },
-    {
-      isPaused: () => selectedObject?.kind !== "SolarSystem",
-    }
-  );
-
   useEffectOnceWhen(() => {
     if (selectedSolarSystem) {
       const [worldX, worldY] = cellToWorld(
         selectedSolarSystem.x,
         selectedSolarSystem.y
       );
-      setViewport({
+      setViewport((vp) => ({
         x: worldX,
         y: worldY,
-        scale: 1,
-      });
+        scale: vp.scale,
+      }));
     }
   }, !!selectedSolarSystem);
 
