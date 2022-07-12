@@ -325,7 +325,7 @@ as declare
   turn_id bigint;
   q_strategy query(udf text) =
     select udf from (
-      select udf, (select count(*) from entity where strategy = udf) as c
+      select udf, (select count(*) from entity where strategy = udf and kind = 1) as c
       from entity_strategy
     )
     order by c asc
