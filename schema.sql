@@ -217,7 +217,7 @@ end //
 create or replace procedure run_turn()
 as declare
   turn_id bigint;
-  entity_next query(sid bigint, eid bigint, plan bigint unsigned) = gen_entity_next();
+  entity_next query(sid bigint, eid bigint, plan bigint unsigned) = to_query(gen_entity_next());
   q_total_writes query(c bigint) =  select variable_value as c
                                     from information_schema.mv_global_status
                                     where
