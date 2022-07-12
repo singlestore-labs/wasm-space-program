@@ -36,6 +36,8 @@ export const UniverseMap = ({
   const [selectedObject, setSelectedObject] = useAtom(selectedObjectAtom);
   const setViewport = useSetAtom(viewportAtom);
 
+  const [moved, setMoved] = useState(false);
+
   const [viewportBounds, setViewportBounds] = useState(
     new Rectangle(0, 0, 0, 0)
   );
@@ -44,6 +46,7 @@ export const UniverseMap = ({
     const [x, y] = worldToCell(bounds.x, bounds.y);
     const [width, height] = worldToCell(bounds.width, bounds.height);
     setViewportBounds(new Rectangle(x, y, width, height));
+    setMoved(true);
   }, []);
 
   const { data: systems } = useSWR(
@@ -55,7 +58,7 @@ export const UniverseMap = ({
   );
 
   useEffectOnceWhen(() => {
-    if (selectedSolarSystem) {
+    if (selectedSolarSystem && !moved) {
       const [worldX, worldY] = cellToWorld(
         selectedSolarSystem.x,
         selectedSolarSystem.y

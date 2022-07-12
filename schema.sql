@@ -323,7 +323,13 @@ end //
 create or replace procedure spawn(min_ships int, min_energy_nodes int)
 as declare
   turn_id bigint;
-  q_strategy query(udf text) = select udf from entity_strategy order by rand() limit 1;
+  q_strategy query(udf text) =
+    select udf from (
+      select udf, (select count(*) from entity where strategy = udf) as c
+      from entity_strategy
+    )
+    order by c asc
+    limit 1;
   strategy text = scalar(q_strategy);
 begin
   start transaction;
@@ -364,8 +370,12 @@ delimiter ;
 
 -- WEB API
 
+create resource pool client with
+  memory_percentage = 30,
+  query_timeout = 5;
+
 drop user if exists web;
-create user web identified by 'wasm-space-program';
+create user web identified by 'wasm-space-program' with default resource pool = client;
 grant select on game.* to web;
 
 /*
