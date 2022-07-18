@@ -68,9 +68,7 @@ const InfoPanel = ({ onOpenInfo }: Props) => {
     >
       <WorkspaceDropdown />
       <StatTable />
-      <Button onClick={onOpenInfo}>
-        More info
-      </Button>
+      <Button onClick={onOpenInfo}>More info</Button>
     </Stack>
   );
 };
