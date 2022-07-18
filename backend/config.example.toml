@@ -6,7 +6,7 @@ minShips = 32
 minEnergyNodes = 128
 
 [database]
-host = "172.17.0.4"
+host = "172.17.0.3"
 port = 3306
 username = "root"
 password = "test"

@@ -6,20 +6,18 @@ import {
 } from "@/data/atoms";
 import { formatMs, formatNumber } from "@/data/format";
 import { queryGlobalStats } from "@/data/queries";
-import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Box,
+  Button,
   Flex,
   HStack,
+  Icon,
   Select,
+  Stack,
 } from "@chakra-ui/react";
 import { useAtom, useAtomValue } from "jotai";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import useSWR from "swr";
 
 type Props = {
@@ -27,58 +25,53 @@ type Props = {
 };
 
 export const GlobalInfo = ({ onOpenInfo }: Props) => {
+  const [showStats, setShowStats] = useState(false);
+
   return (
     <>
       <Flex
         backgroundColor="#311B92"
-        border="2px 2px 0 2px solid #000"
         px={4}
         py={2}
-        mb={2}
         position="relative"
         _hover={{
           backgroundColor: "#3a20ae",
         }}
         cursor="pointer"
-        onClick={onOpenInfo}
+        onClick={() => setShowStats(!showStats)}
       >
-        <Box flex={1} fontWeight={600} fontSize="lg">
+        <Box flex={1} fontWeight={600} fontSize="lg" mr={8}>
           Information
         </Box>
-        <ExternalLinkIcon position="relative" top="5px" right="2px" />
+        <Icon
+          as={showStats ? ChevronUpIcon : ChevronDownIcon}
+          position="relative"
+          top="5px"
+          width="1em"
+          height="1em"
+          fontSize="1.25em"
+        />
       </Flex>
-      <Accordion
-        backgroundColor="#311B92"
-        border="0 2px 2px 2px solid #000"
-        allowToggle
-        py={0}
-        my={0}
-      >
-        <AccordionItem border={0}>
-          <AccordionButton
-            _hover={{
-              backgroundColor: "#3a20ae",
-            }}
-          >
-            <Box
-              flex={1}
-              pr={2}
-              textAlign="left"
-              color="#fff"
-              fontWeight={600}
-              fontSize="lg"
-            >
-              Universe Stats
-            </Box>
-            <AccordionIcon />
-          </AccordionButton>
-          <AccordionPanel>
-            <WorkspaceDropdown />
-            <StatTable />
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+      {showStats && <InfoPanel onOpenInfo={onOpenInfo} />}
     </>
+  );
+};
+
+const InfoPanel = ({ onOpenInfo }: Props) => {
+  return (
+    <Stack
+      backgroundColor="#311B92"
+      px={4}
+      py={2}
+      borderTop="2px solid #4F34C7"
+      spacing={3}
+    >
+      <WorkspaceDropdown />
+      <StatTable />
+      <Button onClick={onOpenInfo}>
+        More info
+      </Button>
+    </Stack>
   );
 };
 
@@ -90,7 +83,7 @@ const WorkspaceDropdown = () => {
     setEndpointIdx(parseInt(evt.target.value, 10));
 
   return (
-    <HStack pt={1} pb={3}>
+    <HStack>
       <Box fontSize="md" flex={1}>
         Workspace:
       </Box>
@@ -117,7 +110,6 @@ const StatTable = () => {
     () => queryGlobalStats(clientConfig),
     {
       refreshInterval: 1000,
-      suspense: true,
     }
   );
 
