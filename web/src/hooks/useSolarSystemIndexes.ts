@@ -15,6 +15,7 @@ export type Cell =
   | {
       kind: "entity";
       entity: EntityRow;
+      entities: EntityRow[];
       selected: boolean;
       energizing?: boolean;
     }
@@ -111,6 +112,7 @@ export const useSolarSystemIndexes = (entities?: EntityRow[]) => {
         newCellList.push({
           kind: "entity",
           entity: entity,
+          entities: cell,
           energizing: numEnergyNodes > 0,
           selected,
         });
@@ -119,6 +121,7 @@ export const useSolarSystemIndexes = (entities?: EntityRow[]) => {
         newCellList.push({
           kind: "entity",
           entity: cell[0],
+          entities: cell,
           selected,
         });
       } else if (numShips > 1) {

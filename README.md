@@ -3,13 +3,13 @@
 > **Note** <br>
 > [Read the blog post here!](https://www.singlestore.com/blog/revolution-2022-wasm-space-program/)
 
-In this demo we simulate a fake universe full of thousands of solar systems. In each solar system there are many space ships and energy nodes. Each space ship is controlled by an AI written in Rust and deployed into SingleStore as a user defined function (UDF) using our new [Code Engine (Powered by Wasm)][code-engine]. The AI is able to observe a 16x16 region of cells around it in order to decide what to do. We execute one turn every second which involves running a series of update queries against SingleStore. These update queries implement asking every AI for their next action and then resolving all actions.
+In this demo we simulate a universe full of thousands of solar systems. In each solar system there are many space ships and energy nodes. Each space ship is controlled by an AI written in Rust and deployed into SingleStore as a user defined function (UDF) using our new [Code Engine (Powered by Wasm)][code-engine]. The AI is able to observe a 16x16 region of cells around it in order to decide what to do. We execute one turn every second which involves running a series of update queries against SingleStore. These update queries implement asking every AI for their next action and then resolving all actions.
 
 The key technologies used are:
 * every solar system is sharded to a specific partition which allows this demo to horizontally scale
 * wasm is used to embed complex agent behavior into the engine and run it in parallel over all of the entities
 * the game client is written in javascript and runs in the browser - so we use the data api to run queries directly against singlestore to gather and display game state
-* the demo is designed to work perfectly with multiple workspaces in order to support many game clients all observing the simulation concurrently
+* the demo is designed to work with multiple workspaces in order to support many game clients all observing the simulation concurrently
 
 ## Turn Resolution
 
@@ -17,7 +17,7 @@ The key technologies used are:
   <img src="web/assets/turn_resolution_simple.png" alt="turn resolution">
 </p>
 
-1. All ships can see entities up to 8 cells away.
+1. All ships can see entities up to 16 cells away.
 2. Each ship decides what to do from the following options:
     - **Hold (energy: 1):** The ship stays where it is.
     - **Move (energy: 2):** The ship moves up to its speed in a

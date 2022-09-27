@@ -25,10 +25,14 @@ export const EntityTracker = ({ explosionIndex, cells }: Props) => {
   const nodes = [];
   for (const cell of cells) {
     if (cell.kind === "entity") {
+      const targetEnergyNode =
+        cell.entities.find((entity) => entity.kind === EntityKind.EnergyNode) ||
+        cell.entities[0];
       nodes.push(
         <Entity
           key={cell.entity.eid}
           entity={cell.entity}
+          target={targetEnergyNode}
           energizing={cell.energizing}
           selected={cell.selected}
           onClick={() => selectEntity(cell.entity)}

@@ -152,7 +152,7 @@ const GameInfo = () => {
 
         ![${ImageFloatRightTag}](${turnResolutionURL})
         ### Turn resolution
-        1. All ships can see entities up to 8 cells away.
+        1. All ships can see entities up to 16 cells away.
         2. Each ship decides what to do from the following options:
             - **Hold (energy: 1):** The ship stays where it is.
             - **Move (energy: 2):** The ship moves up to its speed in a
