@@ -27,6 +27,7 @@ applyplan: func(e: entity, p: plan) -> list<entity>
 // export agent strategies here! please prefix them with "strategy-"
 strategy-flee: func(e: entity, last-plan: plan, system: list<u8>) -> plan
 strategy-battle: func(e: entity, last-plan: plan, system: list<u8>) -> plan
+strategy-blank: func(e: entity, last-plan: plan, system: list<u8>) -> plan
 
 // the default strategy has to be named "strategy-default"
 strategy-default: func(e: entity, last-plan: plan, system: list<u8>) -> plan

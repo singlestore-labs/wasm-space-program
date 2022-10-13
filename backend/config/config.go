@@ -22,8 +22,9 @@ type APIConfig struct {
 }
 
 type WorkerConfig struct {
-	MinShips       int `env:"MIN_SHIPS"`
-	MinEnergyNodes int `env:"MIN_ENERGY_NODES"`
+	MinShips       int  `env:"MIN_SHIPS"`
+	MinEnergyNodes int  `env:"MIN_ENERGY_NODES"`
+	DisableSpawn   bool `env:"DISABLE_SPAWN"`
 }
 
 type DatabaseConfig struct {

@@ -13,7 +13,7 @@ create or replace function applyplan returns table as wasm
 create or replace function strategy_default as wasm
   from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
-replace into entity_strategy values ("strategy_default");
+replace into entity_strategy (udf) values ("strategy_default");
 
 -- add custom strategies here, make sure to also register them in the
 -- entity_strategy table
@@ -21,12 +21,17 @@ replace into entity_strategy values ("strategy_default");
 create or replace function strategy_flee as wasm
   from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
-replace into entity_strategy values ("strategy_flee");
+replace into entity_strategy (udf) values ("strategy_flee");
 
 create or replace function strategy_battle as wasm
   from local infile "agent/target/wasm32-wasi/release/agent.wasm"
   with wit from local infile "agent/interface.wit";
-replace into entity_strategy values ("strategy_battle");
+replace into entity_strategy (udf) values ("strategy_battle");
+
+create or replace function strategy_blank as wasm
+  from local infile "agent/target/wasm32-wasi/release/agent.wasm"
+  with wit from local infile "agent/interface.wit";
+replace into entity_strategy (udf, is_enabled) values ("strategy_blank", false);
 
 delimiter //
 

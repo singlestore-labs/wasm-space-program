@@ -12,6 +12,12 @@ export const debugPlaygroundAtom = atomWithHash("play", false, {
   replaceState: true,
 });
 
+export const spawnStrategyAtom = atomWithHash("spawn", "strategy_default", {
+  replaceState: true,
+  serialize: (val) => val,
+  deserialize: (val) => val,
+});
+
 export const unhandledErrorAtom = atom<null | Error>(null);
 
 export const connectConfigAtom = atom(FetchConnectConfig);

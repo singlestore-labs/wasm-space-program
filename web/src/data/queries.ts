@@ -1,4 +1,4 @@
-import { ClientConfig, Query, QueryOne } from "@/data/client";
+import { ClientConfig, Exec, Query, QueryOne } from "@/data/client";
 import { invert } from "lodash-es";
 import { Rectangle } from "pixi.js";
 
@@ -231,3 +231,21 @@ export const findBattle = (config: ClientConfig): Promise<number | null> =>
     config,
     "select eid from entities_with_conflict limit 1"
   ).then((r) => (r.length ? r[0].eid : null));
+
+export const spawnEntity = (
+  config: ClientConfig,
+  sid: number,
+  kind: EntityKind,
+  x: number,
+  y: number,
+  strategy: string
+): Promise<{ lastInsertId: number; rowsAffected: number }> =>
+  Exec(
+    config,
+    "call spawn_entity(?, ?, ?, ?, ?)",
+    sid,
+    EntityKind[kind],
+    x,
+    y,
+    strategy
+  );

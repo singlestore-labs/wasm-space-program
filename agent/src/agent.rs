@@ -11,6 +11,11 @@ const FLAG_FLEE_DIRECTION: usize = 1;
 const FLAG_BATTLE_ENABLED: usize = 2;
 const FLAG_RANDOM_COUNTER: usize = 3;
 
+#[allow(dead_code)]
+const FLAG_DANCE_INDEX: usize = 4;
+#[allow(dead_code)]
+const FLAG_DANCE_DIST: usize = 5;
+
 mod strategy {
     use crate::command::Direction;
 
@@ -18,17 +23,17 @@ mod strategy {
 
     agent_strategy! {
         upgrade_harvestors(_mem, _last, e, _system) =>
-            (e.harvesters < 10 && e.energy > (50 * (e.harvesters as u16))).then(|| Command::Upgrade(Component::Harvesters))
+            (e.harvesters < 10 && e.energy > (50 * (e.harvesters as u16))).then_some(Command::Upgrade(Component::Harvesters))
     }
 
     agent_strategy! {
         upgrade_thrusters(_mem, _last, e, _system) =>
-            (e.thrusters < 8 && e.energy > (50 * (e.thrusters as u16))).then(|| Command::Upgrade(Component::Thrusters))
+            (e.thrusters < 8 && e.energy > (50 * (e.thrusters as u16))).then_some(Command::Upgrade(Component::Thrusters))
     }
 
     agent_strategy! {
         upgrade_blasters(_mem, _last, e, _system) =>
-            (e.blasters < 8 && e.energy > (50 * (e.blasters as u16))).then(|| Command::Upgrade(Component::Blasters))
+            (e.blasters < 8 && e.energy > (50 * (e.blasters as u16))).then_some(Command::Upgrade(Component::Blasters))
     }
 
     agent_strategy! {
@@ -190,6 +195,27 @@ mod strategy {
             })
         }
     }
+
+    agent_strategy! {
+        dance(mem, last, _e, _system) => {
+            let dir = {
+                if let Command::Move(last_dir, _) = last {
+                    mem[FLAG_DANCE_INDEX] = mem[FLAG_DANCE_INDEX].saturating_sub(1);
+                    if mem[FLAG_DANCE_INDEX] == 0 {
+                        mem[FLAG_DANCE_DIST] = mem[FLAG_DANCE_DIST].wrapping_add(1) % 6;
+                        mem[FLAG_DANCE_INDEX] = mem[FLAG_DANCE_DIST];
+                        last_dir.rotate()
+                    } else {
+                        *last_dir
+                    }
+                } else {
+                    Direction::random()
+                }
+            };
+
+            Some(Command::Move(dir, 1))
+        }
+    }
 }
 
 chain_strategies!(
@@ -218,6 +244,8 @@ chain_strategies!(
     strategy::chase_energy,
     strategy::random_move,
 );
+
+chain_strategies!(name = strategy_blank,);
 
 pub fn execute_strategy(
     strategy: Strategy,

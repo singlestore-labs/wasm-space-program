@@ -5,6 +5,7 @@ pub type Strategy =
 
 macro_rules! chain_strategies {
     ( name = $name:ident, $($strategies:expr),* $(,)? ) => {
+        #[allow(unused_variables)]
         pub fn $name(
             mem: &mut AgentMemory,
             last: &Command,
@@ -25,6 +26,7 @@ pub(crate) use chain_strategies;
 
 macro_rules! agent_strategy {
     ( $name:ident($mem:ident, $last:ident, $entity:ident, $system:ident) => $body:expr ) => {
+        #[allow(dead_code)]
         pub fn $name(
             $mem: &mut AgentMemory,
             $last: &Command,

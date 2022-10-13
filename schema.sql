@@ -24,7 +24,8 @@ create table if not exists solar_system (
 );
 
 create reference table if not exists entity_strategy (
-  udf text primary key
+  udf text primary key,
+  is_enabled boolean default true
 );
 
 create table if not exists entity (
@@ -196,7 +197,7 @@ begin
   end loop;
 
   -- default case
-  query_cases = concat(query_cases, "else strategy_default(", strategy_input, ") end");
+  query_cases = concat(query_cases, "when strategy is NULL then strategy_default(", strategy_input, ") end");
 
   return concat(query_prefix, query_cases, query_suffix);
 end //
@@ -322,31 +323,35 @@ end //
 
 create or replace procedure spawn(min_ships int, min_energy_nodes int)
 as declare
-  turn_id bigint;
   q_strategy query(udf text) =
     select udf from (
       select udf, (select count(*) from entity where strategy = udf and kind = 1) as c
-      from entity_strategy
+      from entity_strategy where is_enabled
     )
     order by c asc
     limit 1;
-  strategy text = scalar(q_strategy);
+  strategy_rows array(record(udf text)) = collect(q_strategy);
+  strategy text;
 begin
   start transaction;
 
-  insert into entity (sid, kind, x, y, strategy)
-  select
-    sid, 1 as kind,
-    floor(rand(now() + sid + 0) * 100) as x,
-    floor(rand(now() + sid + 1) * 100) as y,
-    strategy
-  from solar_system
-  where
-    (
-      select count(*) from entity
-      where entity.sid = solar_system.sid
-        and entity.kind = 1
-    ) < min_ships;
+  if length(strategy_rows) > 0 then
+    strategy = strategy_rows[0].udf;
+
+    insert into entity (sid, kind, x, y, strategy)
+    select
+      sid, 1 as kind,
+      floor(rand(now() + sid + 0) * 100) as x,
+      floor(rand(now() + sid + 1) * 100) as y,
+      strategy
+    from solar_system
+    where
+      (
+        select count(*) from entity
+        where entity.sid = solar_system.sid
+          and entity.kind = 1
+      ) < min_ships;
+  end if;
 
   insert into entity (sid, kind, x, y)
   select
@@ -366,6 +371,12 @@ exception when others then
   rollback; raise;
 end //
 
+create or replace procedure spawn_entity(_sid BIGINT, _kind INT, _x INT, _y INT, _strategy TEXT)
+as begin
+  insert into entity (sid, kind, x, y, strategy)
+  values (_sid, _kind, _x, _y, _strategy);
+end //
+
 delimiter ;
 
 -- WEB API
@@ -377,6 +388,10 @@ create resource pool client with
 drop user if exists web;
 create user web identified by 'wasm-space-program' with default resource pool = client;
 grant select on game.* to web;
+grant execute on game.spawn_entity to web;
+
+-- initial solar system
+insert into solar_system (x, y) values (10, 10);
 
 /*
 insert into entity

@@ -71,6 +71,9 @@ export const vectorDivide = (a: Vector, b: number): Vector => [
   a[1] / b,
 ];
 
+export const vectorDistance = (a: Vector, b: Vector): number =>
+  Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2);
+
 export const vectorEqual = (a: Vector, b: Vector): boolean =>
   a[0] === b[0] && a[1] === b[1];
 

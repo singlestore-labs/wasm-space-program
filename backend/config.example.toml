@@ -4,6 +4,7 @@ port = 3001
 [worker]
 minShips = 32
 minEnergyNodes = 128
+# disableSpawn = true
 
 [database]
 host = "172.17.0.4"

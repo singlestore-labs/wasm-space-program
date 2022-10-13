@@ -58,7 +58,7 @@ export const DebugGrid = ({ highlightCells, width, height }: Props) => (
           }
         }
       },
-      [highlightCells]
+      [height, highlightCells, width]
     )}
   />
 );

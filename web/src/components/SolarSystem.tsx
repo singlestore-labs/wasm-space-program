@@ -1,11 +1,12 @@
 import { AssetContext } from "@/components/AssetLoader";
 import { DebugGrid } from "@/components/DebugGrid";
 import { DebugOnly } from "@/components/DebugOnly";
+import { EntitySpawner } from "@/components/EntitySpawner";
 import { EntityTracker } from "@/components/EntityTracker";
 import { Minimap } from "@/components/Minimap";
 import { Viewport } from "@/components/Viewport";
 import { clientConfigAtom } from "@/data/atoms";
-import { SOLAR_SYSTEM_SIZE_PX } from "@/data/coordinates";
+import { SOLAR_SYSTEM_SIZE_PX, Vector } from "@/data/coordinates";
 import { queryEntities } from "@/data/queries";
 import { useSolarSystemIndexes } from "@/hooks/useSolarSystemIndexes";
 import { Container, TilingSprite } from "@inlet/react-pixi";
@@ -34,7 +35,7 @@ export const SolarSystem = (props: Props) => {
   const { starsTile } = useContext(AssetContext);
   const clientConfig = useAtomValue(clientConfigAtom);
 
-  const { data: entities } = useSWR(
+  const { data: entities, mutate: refreshEntities } = useSWR(
     ["queryEntities", sid, clientConfig],
     () => queryEntities(clientConfig, sid),
     {
@@ -65,6 +66,11 @@ export const SolarSystem = (props: Props) => {
     );
   }
 
+  const minimapPos: Vector = [
+    width - MINIMAP_WIDTH - MINIMAP_MARGIN,
+    height - MINIMAP_HEIGHT - MINIMAP_MARGIN,
+  ];
+
   return (
     <>
       <Viewport
@@ -93,14 +99,20 @@ export const SolarSystem = (props: Props) => {
               width={SOLAR_SYSTEM_SIZE_PX}
               height={SOLAR_SYSTEM_SIZE_PX}
             />
+            <EntitySpawner
+              sid={sid}
+              width={SOLAR_SYSTEM_SIZE_PX}
+              height={SOLAR_SYSTEM_SIZE_PX}
+              onSpawn={refreshEntities}
+            />
           </DebugOnly>
           <EntityTracker cells={cells} explosionIndex={explosionIndex} />
         </Container>
       </Viewport>
 
       <Minimap
-        x={width - MINIMAP_WIDTH - MINIMAP_MARGIN}
-        y={height - MINIMAP_HEIGHT - MINIMAP_MARGIN}
+        x={minimapPos[0]}
+        y={minimapPos[1]}
         width={MINIMAP_WIDTH}
         height={MINIMAP_HEIGHT}
         onOpenMap={onOpenMap}

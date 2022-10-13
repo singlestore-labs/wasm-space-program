@@ -26,7 +26,9 @@ func main() {
 	log.Println("starting worker")
 	worker := game.NewWorker(cfg.Worker, db)
 	go worker.RunTurns()
-	go worker.RunSpawn()
+	if !cfg.Worker.DisableSpawn {
+		go worker.RunSpawn()
+	}
 
 	log.Printf("starting server on port %d", cfg.API.Port)
 	svc := api.NewServer(cfg.API, cfg.WebDataAPI)

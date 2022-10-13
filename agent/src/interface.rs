@@ -1,6 +1,8 @@
 wit_bindgen_rust::export!("interface.wit");
 
-use crate::agent::{execute_strategy, strategy_battle, strategy_default, strategy_flee};
+use crate::agent::{
+    execute_strategy, strategy_battle, strategy_blank, strategy_default, strategy_flee,
+};
 use crate::plan::Plan;
 pub use interface::{Entity, EntitySummary};
 
@@ -20,6 +22,10 @@ impl interface::Interface for Interface {
 
     fn strategy_battle(e: Entity, last_plan_enc: u64, encoded_system: Vec<u8>) -> u64 {
         execute_strategy(strategy_battle, e, last_plan_enc, encoded_system)
+    }
+
+    fn strategy_blank(e: Entity, last_plan_enc: u64, encoded_system: Vec<u8>) -> u64 {
+        execute_strategy(strategy_blank, e, last_plan_enc, encoded_system)
     }
 
     fn decodeplan(p: u64) -> String {
