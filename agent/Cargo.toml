@@ -8,7 +8,7 @@ edition = "2021"
 # some Wasm tools expect this section
 
 [dependencies]
-wit-bindgen-rust = { git = "https://github.com/bytecodealliance/wit-bindgen.git" }
+wit-bindgen-rust = { git = "https://github.com/bytecodealliance/wit-bindgen.git", rev = "60e3c5b41e616fee239304d92128e117dd9be0a7" }
 bytes-cast = "0.2.0"
 bit-struct = "0.1.31"
 serde = { version = "1.0", features = ["derive"] }
