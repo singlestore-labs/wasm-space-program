@@ -272,7 +272,7 @@ begin
     entity.sid = entity_damage.sid
     and entity.eid = entity_damage.eid
   )
-  set entity.shield = entity.shield - entity_damage.damage;
+  set entity.shield = greatest(0, entity.shield - entity_damage.damage);
 
   -- convert dead entities into energy nodes
   update entity set kind = 2
